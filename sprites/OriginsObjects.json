@@ -1,0 +1,9 @@
+{
+	"Shotgun_Mic":  { "File": "Satellite.bmp", "Rect": "2,32,16,16", "Center": "8,8" },
+	"Satellite":  { "File": "Satellite.bmp", "Rect": "30,8,39,40", "Center": "19,20" },
+	"EggHead_Blue":  { "File": "EggHeads.bmp", "Rect": "0,0,32,16", "Center": "16,8" },
+	"RoboHead":  { "File": "EggHeads.bmp", "Rect": "32,0,32,16", "Center": "16,8" },
+	"EggHead":  { "File": "EggHeads.bmp", "Rect": "64,0,32,16", "Center": "16,8" },
+	"TheFBZDoor":  { "File": "AFBZDoor.bmp", "Rect": "0,2,11,60", "Center": "5,30" },
+	"BigBoulderLRZ":  { "File": "LRZBoulder.bmp", "Rect": "0,0,64,64", "Center": "32,32" }
+}
