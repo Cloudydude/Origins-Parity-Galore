@@ -4,7 +4,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
     {
         if (objA0.subtype2c == 1 && objA0.animation.sprite == 0 && !System.getGlobalVariableValueByName("EggmanBlue.laughTimer"))
         {
-            // Who's an egghead, eggface!
+
+// Who's an egghead, eggface!
             u64 heads = (isMainCharacter(CHARACTER_KNUCKLES)) ? "RoboHead" : ((Mods.isModActive("Blue Glasses Eggman")) ? "EggHead_Blue" : "EggHead")
             if (Renderer.hasCustomSprite(heads))
                 Renderer.drawCustomSprite(heads, px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
@@ -637,14 +638,14 @@ function void fn0746f4()
         objA0.position.y.u16 = (camera.position.y.u16 - 0x40)
     }
 
-    #if STANDALONE
+#if STANDALONE
 	if (!isKnucklesFight)
 	{
 		// This was Sonic's boss fight against Big Arms, continue now as if Big Arms was skipped
 		objA0.update_address = 0x072b46
 	}
 	else
-    #endif
+#endif
 	{
 		objA0.update_address = 0x07473a
 
