@@ -637,7 +637,25 @@ function void fn0746f4()
         objA0.position.y.u16 = (camera.position.y.u16 - 0x40)
     }
 
-    base.fn0746f4()
+    #if STANDALONE
+	if (!isKnucklesFight)
+	{
+		// This was Sonic's boss fight against Big Arms, continue now as if Big Arms was skipped
+		objA0.update_address = 0x072b46
+	}
+	else
+#endif
+	{
+		objA0.update_address = 0x07473a
+
+		objA0.render_flags &= ~render_flag.VISIBLE
+		objA0.render_flags |= render_flag.FLIP_X
+		objA0.flags38 |= 0x20
+
+		camera.position.x.u16 += 0x40
+		D2.u16 = objA0.position.x.u16	// Needed?
+		fn0694aa()
+	}
 }
 
 // When jumping out of the eggmobile in LBZ, play a sound
