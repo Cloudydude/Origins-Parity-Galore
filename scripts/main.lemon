@@ -644,7 +644,7 @@ function void fn0746f4()
 		objA0.update_address = 0x072b46
 	}
 	else
-#endif
+    #endif
 	{
 		objA0.update_address = 0x07473a
 
