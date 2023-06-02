@@ -1,0 +1,26 @@
+// LRZ Boulder in boss act
+//# address-hook(0x059fc4) end(0x059fd6)
+function void fn059fc4()
+{
+    if (isSawnic())
+    {
+        base.fn059fc4()
+        return
+    }
+
+    if (allocDynamicObjectStd())
+    {
+        objA1.update_address = 0x204300
+        u8[A1 + 0x04] = (render_flag.WORLD)
+        objA1.subtype2c = 0x03
+        objA1.position.x.u16 = u16[0xffffb000 + 0x10] + 0xA0
+        objA1.position.y.u16 = camera.position.y.u16 
+        objA1.velocity.x = 0
+        objA1.velocity.y = 0x169
+        objA1.hitbox_extends.x = 32
+		objA1.hitbox_extends.y = 32
+        objA1.box_size.x = 32
+        objA1.box_size.y = 32
+    }
+    base.fn059fc4()
+}

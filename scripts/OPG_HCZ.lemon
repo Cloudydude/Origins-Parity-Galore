@@ -1,0 +1,192 @@
+// Stops the characters from shifting over a pixel while on the pillars
+// and makes it so that the characters gets pushed off the pillars if they
+// come into contact with the spikes, while invincible, on the pillars
+// part 1
+global u32 OPG_XPOS_BackupP1
+global u32 OPG_XPOS_BackupP2
+define bool OPG_IsThecharacterGettingPushed = u8[0xffffEF7C + ((A1 == 0xffffb000) ? 0 : 0x01)]
+//# address-hook(0x032784) end(0x0328c2)
+function void fn032784()
+{
+#if STANDALONE
+	if (debug_mode.state)
+		return
+#endif
+
+	u8 bit = (1 << D6.u8)
+	D0.u8 = u8[A2]
+	if (D0.u8 == 0)
+	{
+		if (objA0.flags2a & bit)
+		{
+			u8[A2 + 0x01] = 0
+			D0.u16 = objA1.position.x.u16 - objA0.position.x.u16
+			if (D0.s16 < 0)
+			{
+				D0.s16 = -D0.s16
+				u8[A2 + 0x01] = 0x80
+			}
+			u8[A2 + 0x02] = D0.u8
+
+			objA1.velocity.x = 0
+			objA1.velocity.y = 0
+			u16[A1 + 0x1c] = 0
+			u8[A1 + 0x1e] = u8[A1 + 0x44]
+			u8[A1 + 0x1f] = u8[A1 + 0x45]
+			u8[A1 + 0x20] = 0
+			objA1.flags2a &= ~(char.flag.IN_AIR | char.flag.ROLLING | char.flag.CONTROL_LOCK | char.flag.PUSHING)
+			u8[A1 + 0x2e] = 0x03
+			u8[A1 + 0x40] = 0
+
+			u8[A2] = 1
+			fn03260a()
+		}
+		return
+        OPG_IsThecharacterGettingPushed = false
+	}
+
+    if ((objA1.render_flags & render_flag.VISIBLE) && u8[A1 + 0x05] < 0x04)
+	{
+		if ((objA0.flags2a & bit) == 0)
+		{
+            u8[A1 + 0x40] = 0x01
+            u8[A1 + 0x20] = char.state.BALANCING1
+            u8[A1 + 0x2a] |= char.flag.IN_AIR
+            u8[A1 + 0x2e] = 0
+			u8[A2] = 0
+            OPG_XPOS_BackupP1 = OPG_XPOS_BackupP2 = 0
+            OPG_IsThecharacterGettingPushed = false
+			return
+		}
+		if (u8[A2 + 0x02] != 0)
+		{
+			--u8[A2 + 0x02]
+		}
+
+        // Occasionally check if the character is getting pushed
+        if ((global.framecounter.low & 0x02))
+        {
+            if (A1 == 0xffffb000)
+                OPG_IsThecharacterGettingPushed = (OPG_XPOS_BackupP1 == u32[A1 + 0x10]) ? true : false
+
+            if (A1 == 0xffffb04a)
+                OPG_IsThecharacterGettingPushed = (OPG_XPOS_BackupP2 == u32[A1 + 0x10]) ? true : false
+        }
+
+
+        if (A1 == 0xffffb000)
+            OPG_PillarCode_P1()
+
+        if (A1 == 0xffffb04a)
+            OPG_PillarCode_P2()
+
+		u8[A2 + 0x01] += 2
+		u16[A1 + 0x1c] = 0
+		D0.u16 = objA0.velocity.y
+		if (D0.s16 < 0)
+			D0.s16 = -D0.s16
+
+		if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+			if (D0.u16 >= 0x0480)
+			{
+				u16[A1 + 0x1c] = 0x0800
+			}
+		}
+
+		// Check if jump button pressed
+		D5.u8 &= CONTROL_ABC
+		if (D5.u8 == 0)
+		{
+			fn03260a()
+			return
+		}
+
+        OPG_IsThecharacterGettingPushed = false
+		u8[A1 + 0x40] = 0x01
+		u8[A1 + 0x1e] = 0x0e
+		u8[A1 + 0x1f] = 0x07
+		u8[A1 + 0x20] = char.state.ROLLING
+		u8[A1 + 0x2a] |= char.flag.ROLLING
+		objA1.velocity.y = objA0.velocity.y - 0x680
+		objA1.velocity.x = 0
+		u16[A1 + 0x1c] = 0
+	}
+    else
+        OPG_IsThecharacterGettingPushed = false
+
+	u8[A1 + 0x2a] |= char.flag.IN_AIR
+	objA1.sprite_priority = 0x0100
+	u8[A1 + 0x2e] = 0
+	u8[A2] = 0
+}
+
+// part 2
+function void OPG_PillarCode_P1()
+{
+    if (!OPG_IsThecharacterGettingPushed)
+    {
+        OPG_XPOS_BackupP1 = u32[A1 + 0x10]
+        D0 = u8[A2 + 0x01]
+        LookupSinCos()
+        D0.u16 = (D0.s16 + 0x0100) >> 2
+        u8[A2 + 0x03] = D0.u8
+        D2 = u16[A2 + 0x02]
+        D1.s32 = s32(D1.s16) * D2.s16
+        bool negative = D1.s32 < 0
+        D1.s32 = (negative) ? -D1.s32 : D1.s32
+        D1 >>= 16
+        D1.u16 = (negative) ? -D1.u16 : D1.u16
+        D1.u16 += objA0.position.x.u16
+        objA1.position.x.u16 = D1.u16
+    }
+    else
+    {
+        // code from the spinning pillars in SSZ
+        D1 = 1
+        D0.u16 = objA1.position.x.u16
+        if (D0.u16 != objA0.position.x.u16)
+        {
+            if (D0.u16 >= objA0.position.x.u16)
+            {
+                D1.s16 = -D1.s16
+            }
+            objA1.position.x.u16 += D1.u16
+        }
+    }
+}
+
+// part 3
+function void OPG_PillarCode_P2()
+{
+    if (!OPG_IsThecharacterGettingPushed)
+    {
+        OPG_XPOS_BackupP2 = u32[A1 + 0x10]
+        D0 = u8[A2 + 0x01]
+        LookupSinCos()
+        D0.u16 = (D0.s16 + 0x0100) >> 2
+        u8[A2 + 0x03] = D0.u8
+        D2 = u16[A2 + 0x02]
+        D1.s32 = s32(D1.s16) * D2.s16
+        bool negative = D1.s32 < 0
+        D1.s32 = (negative) ? -D1.s32 : D1.s32
+        D1 >>= 16
+        D1.u16 = (negative) ? -D1.u16 : D1.u16
+        D1.u16 += objA0.position.x.u16
+        objA1.position.x.u16 = D1.u16
+    }
+    else
+    {
+        // code from the spinning pillars in SSZ
+        D1 = 1
+        D0.u16 = objA1.position.x.u16
+        if (D0.u16 != objA0.position.x.u16)
+        {
+            if (D0.u16 >= objA0.position.x.u16)
+            {
+                D1.s16 = -D1.s16
+            }
+            objA1.position.x.u16 += D1.u16
+        }
+    }
+}

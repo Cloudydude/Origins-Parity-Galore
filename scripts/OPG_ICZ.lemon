@@ -1,0 +1,122 @@
+// Have characters look up before getting covered in snow in ICZ act 1
+// and spawn the snow graphic when jumping out of the pile
+//# address-hook(0x053a4c) end(0x053ad2)
+function void fn053a4c()
+{
+    // Part of the avalanche controller after the snowboarding section
+
+    A1 = 0xffffb000
+    if (player1.control_override != 0 && s16[A1 + 0x1c] == 0)
+    {// Looking up before the character is covered in snow
+        u8[A1 + 0x20] = char.state.LOOKING_UP
+        u8[A1 + 0x2e] = 0x01 // char.control_flags that prevents the character from being controlled directly 
+    }
+
+    if (objA0.position.y.u16 == 0x070e && player1.control_override != 0) // Stop looking up after the character is covered in snow
+    {
+        u8[A1 + 0x2e] = 0 // resumes normal control
+        if ((u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+		{
+            if (control.pad1.pressed & CONTROL_ABC)
+            {
+                A2 = 0xffffb000
+                if (allocDynamicObjectStd())
+                {
+                    objA1.update_address = 0x204300
+                    u8[A1 + 0x04] = (render_flag.WORLD)
+                    objA1.subtype2c = 0x06
+                    objA1.position.x.u16 = u16[A2 + 0x10]
+                    objA1.position.y.u16 = u16[A2 + 0x14] - 32
+                    objA1.sprite_priority = u16[A2 + 0x08]
+                    playSound(0x82)
+                }
+            }
+        }
+    }
+    base.fn053a4c()
+}
+
+// The big sliding ice block in ICZ act 1
+//# address-hook(0x08a036) end(0x08a0fa)
+function void fn08a036()
+{
+    base.fn08a036()
+    if (objA0.base_state == 0x0c) // This plays a sound when the ice block hits a wall
+        playSound(0x49)
+}
+
+// Starpointer ice spheres fall when a starpointer is broken
+//# address-hook(0x08bee6) end(0x08bf48)
+function void fn08bee6()
+{
+    base.fn08bee6()
+    u8 SubType = 0x01
+    CallTheSpikedSpheres(SubType)
+}
+
+function void CallTheSpikedSpheres(u8 SubType) // Also referenced in OPG_LBZ
+{
+    A1 = 0xffff0000 + u16[A0 + 0x46]
+    if (objA1.update_address == 0x01e66e)
+    {
+        if (!objA0.subtype2c)
+        {
+            if (allocDynamicObjectStd())
+            {
+                objA0.update_address = 0x204300
+                objA0.subtype2c = SubType
+                objA0.velocity.x = -0x180
+                objA0.velocity.y = -0x100
+            }
+        }
+        else if (objA0.subtype2c == 2)
+        {
+            if (allocDynamicObjectStd())
+            {
+                objA0.update_address = 0x204300
+                objA0.subtype2c = SubType
+                objA0.velocity.x = -0x100
+                objA0.velocity.y = -0x180
+            }
+        }
+        else if (objA0.subtype2c == 4)
+        {
+            if (allocDynamicObjectStd())
+            {
+                objA0.update_address = 0x204300
+                objA0.subtype2c = SubType
+                objA0.velocity.x = 0x100
+                objA0.velocity.y = -0x180
+            }
+        }
+        else if (objA0.subtype2c == 6)
+        {
+            if (allocDynamicObjectStd())
+            {
+                objA0.update_address = 0x204300
+                objA0.subtype2c = SubType
+                objA0.velocity.x = 0x180
+                objA0.velocity.y = -0x100
+            }
+        }
+    }
+}
+
+// Icedus snowballs SFX
+//# address-hook(0x0714b8) end(0x0714c8)
+function void fn0714b8()
+{
+    // Play SFX when collecting the snow, and launching it.
+    // Without !objA0.subtype2c, the sfx would play 8 times at once for all the snowballs getting lifted.
+    if ((objA0.base_state == 0x06 && !objA0.subtype2c) || objA0.base_state == 0x10)
+    {
+        if (!objA0.value3b)
+        {
+            playSound(0xA0)
+            ++objA0.value3b
+        }
+    }
+    else
+        objA0.value3b = 0
+    base.fn0714b8()
+}

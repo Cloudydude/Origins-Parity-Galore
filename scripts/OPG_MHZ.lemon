@@ -1,0 +1,53 @@
+global u16 satellite_Xcords
+global u16 satellite_Ycords
+
+// Broken Satellite Dish
+//# address-hook(0x07603e) end(0x076060)
+function void fn07603e()
+{
+    base.fn07603e()
+    if (allocDynamicObjectStd())
+    {
+        objA1.update_address = 0x204300
+        u8[A1 + 0x04] = (render_flag.WORLD)
+        objA1.subtype2c = 0x02
+        objA1.position.x.u16 = satellite_Xcords
+        objA1.position.y.u16 = satellite_Ycords
+        objA1.sprite_attributes = objA0.sprite_attributes
+        objA1.sprite_priority = objA0.sprite_priority
+        objA1.velocity.x = -0x103
+        objA1.velocity.y = -0x150
+        objA1.box_size.x = 0x13
+        objA1.box_size.y = 0x14
+    }
+}
+
+// Shotgun Microphone part of the satellite
+//# address-hook(0x07662a) end(0x076630)
+function void fn07662a()
+{
+    base.fn07662a()
+    if (objA0.subtype2c == 2)
+    {
+        A1 = 0xffff0000 + u16[A0 + 0x46]
+        if (u8[A1 + 0x2a] & 0x80)
+        {
+            if (allocDynamicObjectStd())
+            {
+                objA1.update_address = 0x204300
+                u8[A1 + 0x04] = (render_flag.WORLD)
+                objA1.subtype2c = 0x04
+                objA1.position.x.u16 = (objA0.position.x.u16 - 18)
+    			objA1.position.y.u16 = (objA0.position.y.u16 - 20)
+                satellite_Xcords = objA0.position.x.u16
+                satellite_Ycords = objA0.position.y.u16
+                objA1.sprite_attributes = objA0.sprite_attributes
+		        objA1.sprite_priority = objA0.sprite_priority
+                objA1.velocity.x = -0x17b
+		        objA1.velocity.y = -0x150
+                objA1.box_size.x = 0x08
+                objA1.box_size.y = 0x08
+            }
+        }
+    }
+}

@@ -1,0 +1,36 @@
+// Red Eye SFX
+//# address-hook(0x07ea3c) end(0x07ea66)
+function void fn07ea3c()
+{
+    base.fn07ea3c()
+    if (!isSawnic())
+    {
+        A1 = 0xffff0000 + u16[A0 + 0x46]
+        if !(u8[A1 + 0x38] & 0x02) // Play after the laser beam is finished
+            playSound(0xc5)
+    }
+}
+
+// Giant eggrobo
+// part 1
+//# address-hook(0x080d9e) end(0x080db8)
+function void fn080d9e()
+{
+    base.fn080d9e()
+    // Makes the door close faster
+    if (u8[0xfffffab8] & 0x01)
+    {
+        objA0.countdown_value = 0x10
+	    objA0.velocity.x = -0x100
+    }
+}
+
+// Plays a sound when the door locks
+// part 2
+//# address-hook(0x080dbe) end(0x080dda)
+function void fn080dbe()
+{
+    base.fn080dbe()
+    if (u8[0xffffeec6] == 0xff)
+        playSound(0x91)
+}

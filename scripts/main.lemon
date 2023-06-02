@@ -1,11 +1,59 @@
+include OPG_Characters
+include OPG_AIZ
+include OPG_HCZ
+include OPG_MGZ
+include OPG_CNZ
+include OPG_ICZ
+include OPG_LBZ
+include OPG_FBZ
+include OPG_MHZ
+include OPG_LRZ
+include OPG_SSZ
+include OPG_DEZ
+
+global bool OPG_Hangerlook
+global bool OPG_KnucklesChuckle
+
+function bool isSawnic() // Check if Sawnic is active
+{
+    if !u8[0xffffe654] && ((Mods.isModActive("Sawnic") && char.character == CHARACTER_SONIC) || ((Mods.isModActive("SAWNIC & SLUDGLES") && (char.character == CHARACTER_SONIC || char.character == CHARACTER_KNUCKLES))))
+        return true
+    else
+        return false
+}
+
+// Play SFX 0x68 when you collect all the chaos emeralds
+//# address-hook(0x02e802) end(0x02e832)
+function void fn02e802()
+{
+    bool PlayIt = (A2 == 0x02e918) ? 1 : 0 // Detect if the right address is getting passed in
+    base.fn02e802() // run base game code
+
+    // load the address that plays the sound when you get all super emeralds,
+    // for when you get all the chaos emeralds
+    if (PlayIt)
+        objA1.update_address = 0x02e9d8
+}
+
 function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 {
-    if (objA0.update_address == 0x067b96)
+    if (global.game_mode == 0x8c) // Resets some of the counters upon restarting
+    {
+        SonicGoesToSleepCounter = 0
+        // This is related to the pillars in HCZ
+        u8[0xffffEF7C] = 0 // P1
+        u8[0xffffEF7D] = 0 // P2
+        // This is realted to the tops in MGZ
+        u8[0xffffEF7E] = 0 // P1
+        u8[0xffffEF7F] = 0 // P2
+    }
+
+    u64 key = 0
+    if (objA0.update_address == 0x067b96 && OPG_Hangerlook)
     {
         if (objA0.subtype2c == 1 && objA0.animation.sprite == 0 && !System.getGlobalVariableValueByName("EggmanBlue.laughTimer"))
         {
-
-// Who's an egghead, eggface!
+            // Who's an egghead, eggface!
             u64 heads = (isMainCharacter(CHARACTER_KNUCKLES)) ? "RoboHead" : ((Mods.isModActive("Blue Glasses Eggman")) ? "EggHead_Blue" : "EggHead")
             if (Renderer.hasCustomSprite(heads))
                 Renderer.drawCustomSprite(heads, px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
@@ -19,7 +67,6 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
             Renderer.drawCustomSprite("TheFBZDoor", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue, objA0.value26, 255)
         return true
     }
-    // 0x07662a - Address for the little bit that looks like a shotgun microphone
     else if (objA0.update_address == 0x204300) //&& global.zone != 0x0c
     {
         if (objA0.subtype2c == 0x04)
@@ -44,8 +91,15 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
                 Renderer.drawCustomSprite("Satellite", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue + 15)
             return true
         }
+        else if (objA0.subtype2c == 0x06)
+        {
+            key = stringformat("ICZ_Snow_%d", objA0.animation.sprite)
+            if (Renderer.hasCustomSprite(key))
+                Renderer.drawCustomSprite(key, px, py, 0x00, 0x00, renderQueue + 15)
+            return true
+        }
     }
-    else if (objA0.update_address == 0x063a6a && global.zone_act == 0x0901)
+    else if (objA0.update_address == 0x063a6a && global.zone_act == 0x0901 && OPG_KnucklesChuckle)
 	{
         if (objA0.base_state == 0x04)
         {
@@ -65,7 +119,6 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         }
         else if (objA0.base_state == 0x08)
         {
-            u64 key = 0
             if (objA0.value26 < 40)
             {
                 ++objA0.value26
@@ -105,709 +158,6 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	}
 
     return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
-}
-
-//FBZ2 Egg Hanger
-// Makes the egg boys look up at the player when they're between their mits
-//# address-hook(0x067be6) end(0x067c36)
-function void fn067be6()
-{
-    base.fn067be6()
-	CheckDistanceToPlayer1()
-    objA0.subtype2c = (D2.u16 <= 0x20) ? 0x01 : 0x00
-}
-
-// Custom function that only checks the distance-x between an enemy/boss for Player 1
-function void CheckDistanceToPlayer1()
-{
-	// Outputs:
-	//  - A1:     RAM address of closest player (0xffffb000 or 0xffffb04a)
-	//  - D0:     Relative position-x of the player: 0 = left, 2 = right
-	//  - D1:     Relative position-y of the player: 0 = above, 2 = below
-	//  - D2.u16: Distance-x to closest player (abs value)
-	//  - D3.u16: Distance-y to closest player (abs value)
-
-	// Check distance-x to both players
-	A1 = 0xffffb000
-	// A2 = 0xffffb04a
-	D2.s16 = objA0.position.x.u16 - objA1.position.x.u16
-	// D3.s16 = objA0.position.x.u16 - u16[A2 + 0x10]
-
-	D0 = (D2.s16 < 0) ? 2 : 0
-	D1 = (D3.s16 < 0) ? 2 : 0
-	D2.u16 = abs(D2.s16)
-	// D3.u16 = abs(D3.s16)
-
-	// Which one is closer?
-	if (D3.u16 < D2.u16)
-	{
-		A1 = A2
-		D0 = D1
-		D2.u16 = D3.u16
-	}
-
-	// Check distance-y to the closest player
-	// D3.s16 = objA0.position.y.u16 - objA1.position.y.u16
-	// D1 = (D3.s16 < 0) ? 2 : 0
-	// D3.u16 = abs(D3.s16)
-}
-
-// Spinning tops fade in and out when you jump off them
-//# address-hook(0x034d92) end(0x034db6)
-function void fn034d92()
-{
-    base.fn034d92()
-    if (!checkForUnloadObjectAtPosition(objA0.position.x.u16))
-        objA0.render_flags = (global.framecounter.low & 0x01) ? render_flag.WORLD : 0
-}
-
-global u16 satellite_Xcords
-global u16 satellite_Ycords
-
-// Broken Satellite Dish
-//# address-hook(0x07603e) end(0x076060)
-function void fn07603e()
-{
-    base.fn07603e()
-    if (allocDynamicObjectStd())
-    {
-        objA1.update_address = 0x204300
-        u8[A1 + 0x04] = (render_flag.WORLD)
-        objA1.subtype2c = 0x02
-        objA1.position.x.u16 = satellite_Xcords
-        objA1.position.y.u16 = satellite_Ycords
-        objA1.sprite_attributes = objA0.sprite_attributes
-        objA1.sprite_priority = objA0.sprite_priority
-        objA1.velocity.x = -0x103
-        objA1.velocity.y = -0x150
-        objA1.box_size.x = 0x13
-        objA1.box_size.y = 0x14
-    }
-}
-
-// Shotgun Microphone part of the satellite
-//# address-hook(0x07662a) end(0x076630)
-function void fn07662a()
-{
-    base.fn07662a()
-    if (objA0.subtype2c == 2)
-    {
-        A1 = 0xffff0000 + u16[A0 + 0x46]
-        if (u8[A1 + 0x2a] & 0x80)
-        {
-            if (allocDynamicObjectStd())
-            {
-                objA1.update_address = 0x204300
-                u8[A1 + 0x04] = (render_flag.WORLD)
-                objA1.subtype2c = 0x04
-                objA1.position.x.u16 = (objA0.position.x.u16 - 18)
-    			objA1.position.y.u16 = (objA0.position.y.u16 - 20)
-                satellite_Xcords = objA0.position.x.u16
-                satellite_Ycords = objA0.position.y.u16
-                objA1.sprite_attributes = objA0.sprite_attributes
-		        objA1.sprite_priority = objA0.sprite_priority
-                objA1.velocity.x = -0x17b
-		        objA1.velocity.y = -0x150
-                objA1.box_size.x = 0x08
-                objA1.box_size.y = 0x08
-            }
-        }
-    }
-}
-
-//# address-hook(0x0866cc) end(0x0866d4)
-function void fn0866cc()
-{
-    base.fn0866cc()
-    if (global.zone_act == 0x0001) // Make the capsule in AIZ act 2 fly away like in MGZ act 2
-        objA0.base_state = 0x12
-}
-
-// MGZ Blue Wheel sounds part 1
-//# address-hook(0x025d9c) end(0x025ea0)
-function void fn025d9c()
-{
-	D1.u16 = 0x1b
-	D2.u16 = 0x10
-	D4.u16 = objA0.position.x.u16
-	A2 = 0x025f0e
-    fn01dd0e()
-
-	D6 = (D6 << 16) + (D6 >> 16)
-	D6.u16 &= 0x33
-	if (D6.u16 != 0)
-	{
-		D0.u8 = D6.u8 & 0x11
-		if (D0.u8 != 0)
-		{
-			A1 = 0xffffb000
-			if (objA1.state == char.state.SPINDASH)
-			{
-                if (objA1.subtype2c == 1)
-                {
-                    playSound(0x8e) // here's our new sound
-                    objA1.subtype2c = 0
-                }
-				// u16[A0 + 0x30] = 0x3c
-				// u8[A0 + 0x32] = 1
-				// D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
-				// if (D0.u8 == 0)
-				// {
-				// 	u8[A0 + 0x32] = 0xff
-				// }
-			}
-            else
-                objA1.subtype2c = 1
-		}
-
-		D6.u8 &= 0x22
-		if (D6.u8 != 0)
-		{
-			A1 = 0xffffb04a
-			if (objA1.state == char.state.SPINDASH)
-			{
-                if (objA1.subtype2c == 1)
-                {
-                    playSound(0x8e) // here's our new sound
-                    objA1.subtype2c = 0
-                }
-				// u16[A0 + 0x30] = 0x3c
-				// u8[A0 + 0x32] = 1
-				// D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
-				// if (D0.u8 == 0)
-				// {
-				// 	u8[A0 + 0x32] = 0xff
-				// }
-			}
-            else
-                objA1.subtype2c = 1
-		}
-	}
-    base.fn025d9c()
-}
-
-// MGZ Blue Wheel sounds part 2
-// The part where you bounce around on the wheels
-//# address-hook(0x025ea6) end(0x025f0c)
-function void fn025ea6()
-{
-    playSound(0x8e)
-    base.fn025ea6()
-}
-
-// The gravity room in DEZ act 1
-// It plays a sound when all the yellow spots are red
-//# address-hook(0x049a02) end(0x049a0a)
-function void fn049a02()
-{
-    base.fn049a02()
-    if (u8[0xfffff7c0] == 0x3f && !objA0.subtype2c)
-    {
-        playSound(0xad)
-        objA0.subtype2c = 1
-    }
-}
-
-// The big sliding ice block in ICZ act 1
-// This plays a sound when the ice block hits a wall
-//# address-hook(0x08a036) end(0x08a0fa)
-function void fn08a036()
-{
-    base.fn08a036()
-    if (objA0.base_state == 0x0c)
-        playSound(0x49)
-}
-
-// LBZ elevator peelout sfx
-// part 1
-//# address-hook(0x029e42) end(0x029eb0)
-function void fn029e42()
-{
-	if !(u16[A0 + 0x38] != 0x0200 && u16[A0 + 0x38] != 0x0202)
-	{
-		u8[A4] += 2
-		Audio.playAudio("peelout_charge", AudioContext.CONTEXT_SOUND)
-		fn029eb2()
-	}
-	else
-	{
-        base.fn029e42()
-        return
-	}
-}
-
-// LBZ elevator peelout sfx
-// part 2
-//# address-hook(0x029eb2) end(0x029f32)
-function void fn029eb2()
-{
-    base.fn029eb2()
-    if !(u16[A0 + 0x3c] < 0x0180)
-        Audio.playAudio("peelout_release", AudioContext.CONTEXT_SOUND)
-}
-
-// Signpost renders in-front of gapsule
-//# address-hook(0x0837d8) end(0x08382e)
-function void fn0837d8()
-{
-    base.fn0837d8()
-    if (global.zone_act == 0x0400) // Only do this in FBZ
-		objA0.sprite_priority = 0x180
-}
-
-// Sonic sleeping animation
-global u16 SonicGoesToSleepCounter
-function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationSpriteEx)
-{
-	u64 key = 0
-	if (global.game_mode == 0x8c)
-		SonicGoesToSleepCounter = 0
-
-	if (char.mapping_offset == 0x146620 && !u8[0xffffe654] && !(char.control_flags & 0x01))
-	{
-		if (char.state == char.state.STANDING) // Only when Sonic is standing, and not being controlled by the game
-		{
-			if (SonicGoesToSleepCounter < 3176)
-				SonicGoesToSleepCounter++
-			
-			if (SonicGoesToSleepCounter >= 2896 && SonicGoesToSleepCounter <= 3148) // Slow foot tap
-			{
-				u8 animation = ((global.framecounter >> 4) % (2))
-				key = stringformat("Sonic_Sleep_%d", animation)
-				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, animation + 0xbf, 0x00)
-			}
-			else if (SonicGoesToSleepCounter >= 3149 && SonicGoesToSleepCounter <= 3174) // Lower head part 1
-			{
-				key = "Sonic_Sleep_2"
-				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc1, 0x00)
-			}
-			else if (SonicGoesToSleepCounter >= 3175) // Lower head part 2
-			{
-				key = "Sonic_Sleep_3"
-				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc2, 0x00)
-			}
-
-			return key
-		}
-		else
-			SonicGoesToSleepCounter = 0 // If Sonic does anything besides being idle, or being controlled, reset the counter
-	}
-
-	return base.Standalone.getModdedAnimationSpriteKey(character, animationSpriteEx)
-}
-
-// Have characters look up before getting covered in snow in ICZ act 1
-//# address-hook(0x053a4c) end(0x053ad2)
-function void fn053a4c()
-{
-    // Part of the avalanche controller after the snowboarding section
-
-    A1 = 0xffffb000
-    if (player1.control_override != 0 && s16[A1 + 0x1c] == 0)
-    {// Looking up before the character is covered in snow
-        u8[A1 + 0x20] = char.state.LOOKING_UP
-        u8[A1 + 0x2e] = 0x01 // char.control_flags that prevents the character from being controlled directly 
-    }
-
-    if (objA0.position.y.u16 == 0x070e && player1.control_override != 0) // Stop looking up after the character is covered in snow
-        u8[A1 + 0x2e] = 0 // resumes normal control
-
-    base.fn053a4c()
-}
-
-// SSZ Post MechaSonic fight cutscene
-// Charcters start to wobble
-// part 1
-//# address-hook(0x057eba) end(0x057eba)
-function void fn057eba()
-{
-    A1 = 0xffffb000
-    u8[A1 + 0x20] = char.state.BALANCING1
-    u8[A1 + 0x2e] = 0x01
-
-    if (getNumPlayers() == 2)
-    {
-        A1 = 0xffffb04a
-        u8[A1 + 0x20] = char.state.BALANCING1
-        u8[A1 + 0x2e] = 0x01
-    }
-    base.fn057eba()
-}
-
-// Charcters stop wobbling
-// part 2
-//# address-hook(0x057edc) end(0x057f14)
-function void fn057edc()
-{
-    base.fn057edc()
-    if Audio.isPlayingAudio(SFX_COLLAPSE)
-    {
-        A1 = 0xffffb000
-        u8[A1 + 0x2e] = 0
-        if (getNumPlayers() == 2)
-        {
-            A1 = 0xffffb04a
-            u8[A1 + 0x2e] = 0
-        }
-    }
-}
-
-// LRZ Boulder in boss act
-//# address-hook(0x059fc4) end(0x059fd6)
-function void fn059fc4()
-{
-    if (allocDynamicObjectStd())
-    {
-        objA1.update_address = 0x204300
-        u8[A1 + 0x04] = (render_flag.WORLD)
-        objA1.subtype2c = 0x03
-        objA1.position.x.u16 = u16[0xffffb000 + 0x10] + 0xA0
-        objA1.position.y.u16 = camera.position.y.u16 
-        objA1.velocity.x = 0
-        objA1.velocity.y = 0x169
-        objA1.hitbox_extends.x = 32
-		objA1.hitbox_extends.y = 32
-        objA1.box_size.x = 32
-        objA1.box_size.y = 32
-    }
-    base.fn059fc4()
-}
-
-// Have the firebombing sequence playout like it does in Origins
-// part 1
-//# address-hook(0x0685b8) end(0x0685b8)
-function void fn0685b8()
-{
-	base.fn0685b8()
-	if (objA0.position.y.u16 >= 0x307)
-		player1.control_override = player2.control_override = 0 // Have the players regain control
-	else
-	{
-		player2.control_override = 0xff // Disable P2's controls
-		control.tails = 0x0101
-		A2 = 0xffffb04a
-		if (u8[A2 + 0x2f] != 0) // If Tails is flying, have him fall to the ground
-		{
-			u8[A2 + 0x2f] = 0
-			u8[A2 + 0x20] = char.state.ROLLING
-			u8[A2 + 0x40] = 0
-		}
-
-		u8[A2 + 0x04] &= ~render_flag.FLIP_X
-		u8[A2 + 0x2a] &= ~char.flag.FACING_LEFT
-
-	}
-}
-
-// part 2
-//# address-hook(0x06852c) end(0x068550)
-function void fn06852c()
-{
-#if STANDALONE
-	// Extend level chunks a bit
-	u8[0xffff82ce] = u8[0xffff82cd]
-	u8[0xffff832f] = u8[0xffff832e]
-	u8[0xffff8390] = u8[0xffff838f]
-#endif
-
-	D5.u16 = 0x2f10
-	if (camera.position.x.u16 < D5.u16)
-	{
-	#if STANDALONE
-		// Set right border here already to prevent camera going too far for one frame
-		move_area.right = D5.u16 + (getScreenWidth() - 320)
-	#endif
-		return
-	}
-
-	if (Mods.isModActive("Speed up AIZ fire bombing"))
-	{
-	#if STANDALONE
-		Game.startSkippableCutscene()
-	#endif
-	}
-
-	player1.control_override = 0xff // Disable P1's controls
-	control.player1 = 0
-
-	A1 = 0xffffb000
-	if (u8[A1 + 0x2b] & char.bonus.INVINCIBLE) // if player 1 is invincible, tell the game to resume playing the normal act music
-		playMusic(MUSIC_CTRL_FADEOUT)
-
-	D0.s16 = objA1.position.x.u16
-
-	if (abs(D0.s16) == 12259)
-	{
-		StopObjectA1()
-
-		objA1.render_flags &= ~render_flag.FLIP_X
-		u8[A1 + 0x2a] &= ~char.flag.FACING_LEFT
-
-		control.player1 = 0x0101		// CONTROL_UP, CONTROL_UP
-		
-		base.fn06852c()
-	}
-	else
-	{
-		D1 = (D0.s16 > 12259) ? 2 : 3		// CONTROL_LEFT : CONTROL_RIGHT
-		control.player1.state |= (1 << D1.u8)
-	}
-}
-
-// Big Arms post defeat
-// part 1
-//# address-hook(0x0746d8) end(0x0746ee)
-function void fn0746d8()
-{
-	objA0.update_address = 0x0746f4
-    u16 CenterScreen = camera.position.x.u16 + getScreenWidth() / 2
-    u16 IsEggyAtTheBottom = (camera.position.y.u16 + getScreenHeight() / 2) + 68
-    // If Eggman is too far to the left side of the screen, send him in the direction of 
-    // the right side, and vice versa
-    objA0.subtype2c = ((objA0.position.x.u16 <= CenterScreen)) ? 1 : 0
-    objA0.value3b = (objA0.position.y.u16 >= IsEggyAtTheBottom) ? 1 : 0
-}
-
-// part 2
-//# address-hook(0x0746f4) end(0x074734)
-function void fn0746f4()
-{
-    // Here so that Blue glasses Eggman doesn't play the incorrect frame when Eggman falls on the platform, or ground
-    System.setGlobalVariableValueByName("EggmanBlue.burnType", 0)
-
-    // Wait until defeated Robotnik leaves the screen to the top
-	if !(objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x40)
-	{
-        // System.writeDisplayLine(stringformat("objA0.velocity.x: %x", objA0.velocity.x))
-        MoveWithGravity20()
-        UpdateMovementStraightSimple()
-
-        if (!objA0.state)
-        {
-            objA0.velocity.x = (objA0.subtype2c) ? 0x103 : -0x103
-            objA0.velocity.y = -0x150
-            objA0.value3a = true // Tell the game to let the arms go when Big arms is defeated, exploding and moving
-            if (objA0.value3b) // in case Big Arms is defeated underneath the level 
-            {
-                ++objA0.value3b
-                if (objA0.value3b >= 20)
-                    objA0.state++
-            }
-            else
-                objA0.state++
-        }
-        else if (objA0.state == 1)
-        {
-            CheckGroundCollision()
-            if (D1.s16 <= 15)
-            {
-                objA0.state++
-                objA0.position.y.u16 -= D1.s16
-                objA0.velocity.x = (objA0.subtype2c) ? 0x80 : -0x80
-                objA0.velocity.y = -0x150
-                camera.screenshake.state = 0x14
-                playSound(0x6e)
-
-                objA0.animation.sprite = 5
-	            objA0.flags38 |= 0x10
-                spawnChildObject(0x074d14, 0x00, -12, -44)
-                spawnChildObject(0x074d14, 0x02, 20, -44)
-                spawnChildObject(0x074d14, 0x04, 44, -24)
-                spawnChildObject(0x074d14, 0x06, -12, -4)
-                spawnChildObject(0x074d14, 0x08, 20, -4)
-            }
-            
-        }
-
-		DrawObject()
-		return
-	}
-
-
-    // Why is this here?
-    // Well, MoveWithGravity20(), or UpdateMovementStraightSimple(), not sure which?
-    // One of them Messes with the coordinates for the Eggmobile during Knuckles' Big Arms,
-    // after it's defeated.
-    bool isKnucklesFight = (camera.position.y.u16 < 0x0500)
-    if (isKnucklesFight)
-    {
-        objA0.position.x.u16 = 0x4340
-        objA0.position.y.u16 = (camera.position.y.u16 - 0x40)
-    }
-
-#if STANDALONE
-	if (!isKnucklesFight)
-	{
-		// This was Sonic's boss fight against Big Arms, continue now as if Big Arms was skipped
-		objA0.update_address = 0x072b46
-	}
-	else
-#endif
-	{
-		objA0.update_address = 0x07473a
-
-		objA0.render_flags &= ~render_flag.VISIBLE
-		objA0.render_flags |= render_flag.FLIP_X
-		objA0.flags38 |= 0x20
-
-		camera.position.x.u16 += 0x40
-		D2.u16 = objA0.position.x.u16	// Needed?
-		fn0694aa()
-	}
-}
-
-// When jumping out of the eggmobile in LBZ, play a sound
-//# address-hook(0x08d47c) end(0x08d4c6)
-function void fn08d47c()
-{
-    base.fn08d47c()
-	if (objA0.position.x.u16 >= 0x4440)
-        playSound(0x62)
-}
-
-
-// Big Arms' arms
-// part 1
-//# address-hook(0x0749d0) end(0x0749e0)
-function void fn0749d0()
-{
-    if (LetTheArmsFall())
-        return
-    base.fn0749d0()
-}
-
-// part 2
-//# address-hook(0x074ad0) end(0x074af4)
-function void fn074ad0()
-{
-    if (LetTheArmsFall())
-        return
-    base.fn074ad0()
-}
-
-// part 3
-//# address-hook(0x074b3c) end(0x074b70)
-function void fn074b3c()
-{
-    if (LetTheArmsFall())
-        return
-    base.fn074b3c()
-}
-
-// part 4
-//# address-hook(0x074b76) end(0x074b98)
-function void fn074b76()
-{
-    if (LetTheArmsFall())
-        return
-    base.fn074b76()
-}
-
-// part 5
-function bool LetTheArmsFall()
-{
-    A1 = 0xffff0000 + u16[A0 + 0x46]
-	if (u8[A1 + 0x2a] & 0x80)
-	{
-        if (!boss.remaining_hits && !DropBigArms_Arms())
-        {
-            DrawObject()
-            return true
-        }
-	}
-    return false
-}
-
-// part 6
-// Maybe it's a bit extreme, but I'm not creating a global variable
-// and reseting it in a common function that could get overwritten
-// by another mod.
-function bool DropBigArms_Arms()
-{
-	A2 = 0xffffb000
-    s16 count = 0x6d
-    while (count >= 0)
-    {
-        // Go to the next object
-        A2 += 0x4a
-        --count
-		if (u32[A2] == 0x0746f4) // Search for the address that calls Big Arms defeat sequence
-            return u8[A2 + 0x3a] // true
-    }
-	return false
-}
-
-// Starpointer ice spheres fall when starpointer is broken
-//# address-hook(0x08bee6) end(0x08bf48)
-function void fn08bee6()
-{
-    base.fn08bee6()
-    u8 SubType = 0x01
-    CallTheSpikedSpheres(SubType)
-}
-
-// Orbinaut spiked spheres, in LBZ, fall when orbinaut is broken
-//# address-hook(0x08c6b0) end(0x08c6d0)
-function void fn08c6b0()
-{
-    base.fn08c6b0()
-    u8 SubType = 0x05
-    CallTheSpikedSpheres(SubType)
-}
-
-function void CallTheSpikedSpheres(u8 SubType)
-{
-    A1 = 0xffff0000 + u16[A0 + 0x46]
-    if (objA1.update_address == 0x01e66e)
-    {
-        if (!objA0.subtype2c)
-        {
-            if (allocDynamicObjectStd())
-            {
-                objA0.update_address = 0x204300
-                objA0.hitbox_extends.x = 0x08
-                objA0.subtype2c = SubType
-                objA0.velocity.x = -0x180
-                objA0.velocity.y = -0x100
-            }
-        }
-        else if (objA0.subtype2c == 2)
-        {
-            if (allocDynamicObjectStd())
-            {
-                objA0.update_address = 0x204300
-                objA0.hitbox_extends.x = 0x08
-                objA0.subtype2c = SubType
-                objA0.velocity.x = -0x100
-                objA0.velocity.y = -0x180
-            }
-        }
-        else if (objA0.subtype2c == 4)
-        {
-            if (allocDynamicObjectStd())
-            {
-                objA0.update_address = 0x204300
-                objA0.hitbox_extends.x = 0x08
-                objA0.subtype2c = SubType
-                objA0.velocity.x = 0x100
-                objA0.velocity.y = -0x180
-            }
-        }
-        else if (objA0.subtype2c == 6)
-        {
-            if (allocDynamicObjectStd())
-            {
-                objA0.update_address = 0x204300
-                objA0.hitbox_extends.x = 0x08
-                objA0.subtype2c = SubType
-                objA0.velocity.x = 0x180
-                objA0.velocity.y = -0x100
-            }
-        }
-    }
 }
 
 //# address-hook(0x204300)
@@ -870,7 +220,7 @@ function void OriginsObjects()
     else if (objA0.subtype2c == 0x01) // Starpointer orbiting icy spiked spheres
     {
         if (objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x20)
-			UnloadObject()
+			Object.TriggerUnloading()
         
         setupObjectAttributesBasic(0x08bf9a)
         MoveWithGravity20()
@@ -881,7 +231,7 @@ function void OriginsObjects()
     else if (objA0.subtype2c == 0x05) // Orbinaut orbiting spiked spheres
     {
         if (objA0.position.y.u16 > camera.position.y.u16 + getScreenHeight() + 0x20)
-			UnloadObject()
+            Object.TriggerUnloading()
         
         setupObjectAttributesBasic(0x08c6fe)
         MoveWithGravity20()
@@ -889,180 +239,26 @@ function void OriginsObjects()
         if (global.framecounter.low & 0x01)
             DrawOrUnloadObject()
     }
+    else if (objA0.subtype2c == 0x06) // Snow graphic at the beginning of ICZ act 1
+    {
+        if (objA0.animation.sprite >= 8)
+            UnloadObject()
+
+        ++objA0.animation.timer
+		if (objA0.animation.timer > 5)
+		{
+			if (objA0.animation.sprite < 8)
+				++objA0.animation.sprite
+			else
+				objA0.animation.sprite = 0
+				
+			objA0.animation.timer = 0
+		}
+        DrawOrUnloadObject()
+    }
     else
     {
         base.OriginsObjects()
         return
-    }
-}
-
-// Player 2 can't pop the balloons in CNZ
-//# address-hook(0x031754) end(0x0317a8)
-function void fn031754()
-{
-	A1 = 0xffffb000
-	if (u8[A0 + 0x29] & 0x01)
-	{
-		u8[A0 + 0x29] &= ~0x01
-		fn0317ae()
-	}
-
-	A1 = 0xffffb04a
-	if (u8[A0 + 0x29] & 0x02)
-	{
-		u8[A0 + 0x29] &= ~0x02
-		P2Balloons()
-	}
-    else
-        objA0.value3a = 0
-
-	Object.animationUpdate(0x03185e)
-
-	//if (u8[0x05] != 0)		// WTF?
-	//{
-	//	objA0.position.x.u16 = 0x7f00
-	//}
-
-	objA0.position.y.u16 = objA0.value32 + (lookupSin(objA0.value26) >> 5)
-	++objA0.value26
-
-	fn01b662()
-}
-
-function void P2Balloons()
-{
-    objA1.velocity.y = -0x700
-	objA1.flags2a |= char.flag.IN_AIR
-	objA1.flags2a &= ~(char.flag.CONTROL_LOCK | char.flag.PUSHING)
-	u8[A1 + 0x2e] = 0
-
-#if STANDALONE
-	// Check for active dropdash
-	if (u8[A1 + 0x38] != CHARACTER_SONIC || u8[A1 + 0x20] != char.state.SONIC_DROPDASH)
-#endif
-	{
-		// Reset the "char.jumping" to make the character bounce off ignoring the velocity-y limit
-		u8[A1 + 0x40] = 0
-	}
-
-	// objA0.state |= 0x01
-	if (s8[A0 + 0x2c] < 0)
-	{
-		objA1.velocity.y = -0x380
-	}
-
-    if (!objA0.value3a) // Only play the sound once when bouncing off the balloon
-    {
-        playSound(0x7b)
-        ++objA0.value3a
-    }
-}
-
-
-// Giant eggrobo
-// part 1
-//# address-hook(0x080d9e) end(0x080db8)
-function void fn080d9e()
-{
-    base.fn080d9e()
-    // Makes the door close faster
-    if (u8[0xfffffab8] & 0x01)
-    {
-        objA0.countdown_value = 0x10
-	    objA0.velocity.x = -0x100
-    }
-}
-
-// Plays a sound when the door locks
-// part 2
-//# address-hook(0x080dbe) end(0x080dda)
-function void fn080dbe()
-{
-    base.fn080dbe()
-    if (u8[0xffffeec6] == 0xff)
-        playSound(0x91)
-}
-
-
-// Icedus snowballs SFX
-//# address-hook(0x0714b8) end(0x0714c8)
-function void fn0714b8()
-{
-    // Play SFX when collecting the snow, and launching it.
-    // Without !objA0.subtype2c, the sfx would play 8 times at once for all the snowballs getting lifted.
-    if ((objA0.base_state == 0x06 && !objA0.subtype2c) || objA0.base_state == 0x10)
-    {
-        if (!objA0.value3b)
-        {
-            playSound(0xA0)
-            ++objA0.value3b
-        }
-    }
-    else
-        objA0.value3b = 0
-    base.fn0714b8()
-}
-
-// Red Eye SFX
-//# address-hook(0x07ea3c) end(0x07ea66)
-function void fn07ea3c()
-{
-    base.fn07ea3c()
-	A1 = 0xffff0000 + u16[A0 + 0x46]
-	if !(u8[A1 + 0x38] & 0x02) // Play after the laser beam is finished
-        playSound(0xc5)
-}
-
-// Untransform from a super state when you lose a life
-// part 1
-//# address-hook(0x010366) end(0x01036c)
-function void Character.Die()
-{
-    DeactivateSuper()
-    base.Character.Die()
-}
-
-// part 2
-//# address-hook(0x01036e) end(0x0103b8)
-function void Character.Die_internal()
-{
-    DeactivateSuper()
-    base.Character.Die_internal()
-}
-
-// part 3
-function void Character.Die_noSound()
-{
-    DeactivateSuper()
-    base.Character.Die_noSound()
-}
-
-// part 4
-function void DeactivateSuper()
-{
-    if (super.active || super.active.tails)
-        Character.cancelSuperTransformation()
-}
-
-// Characters wobble when the Egg Drillster Mk. II slams into the terrain in MGZ's act 2 boss fight
-//# address-hook(0x05180a) end(0x05183c)
-function void fn05180a()
-{
-    base.fn05180a()
-    if (objA0.flags2a & object.flag.P1_ON_OBJECT) // Only do this when the character has landed on the floor
-    {
-        A1 = 0xffffb000
-        u8[A1 + 0x20] = char.state.BALANCING1
-        u8[A1 + 0x2e] = 0x01
-    }
-
-    if (getNumPlayers() == 2)
-    {
-        if (objA0.flags2a & object.flag.P2_ON_OBJECT)
-        {
-            A1 = 0xffffb04a
-            u8[A1 + 0x20] = char.state.BALANCING1
-            u8[A1 + 0x2e] = 0x01
-        }
     }
 }
