@@ -5,5 +5,13 @@
 	"RoboHead":  { "File": "EggHeads.bmp", "Rect": "32,0,32,16", "Center": "16,8" },
 	"EggHead":  { "File": "EggHeads.bmp", "Rect": "64,0,32,16", "Center": "16,8" },
 	"TheFBZDoor":  { "File": "AFBZDoor.bmp", "Rect": "0,2,11,60", "Center": "5,30" },
-	"BigBoulderLRZ":  { "File": "LRZBoulder.bmp", "Rect": "0,0,64,64", "Center": "32,32" }
+	"BigBoulderLRZ":  { "File": "LRZBoulder.bmp", "Rect": "0,0,64,64", "Center": "32,32" },
+	"ICZ_Snow_0":  { "File": "ICZ Snow.bmp", "Rect": "0,0,32,32", "Center": "16,16" },
+	"ICZ_Snow_1":  { "File": "ICZ Snow.bmp", "Rect": "40,0,32,32", "Center": "16,16" },
+	"ICZ_Snow_2":  { "File": "ICZ Snow.bmp", "Rect": "80,0,32,32", "Center": "16,16" },
+	"ICZ_Snow_3":  { "File": "ICZ Snow.bmp", "Rect": "120,0,32,32", "Center": "16,16" },
+	"ICZ_Snow_4":  { "File": "ICZ Snow.bmp", "Rect": "0,40,32,32", "Center": "16,16" },
+	"ICZ_Snow_5":  { "File": "ICZ Snow.bmp", "Rect": "40,40,32,32", "Center": "16,16" },
+	"ICZ_Snow_6":  { "File": "ICZ Snow.bmp", "Rect": "80,40,32,32", "Center": "16,16" },
+	"ICZ_Snow_7":  { "File": "ICZ Snow.bmp", "Rect": "120,40,32,32", "Center": "16,16" }
 }
