@@ -4,6 +4,48 @@
 		"Name": "Origins Parity Galore",
 		"Author": "iCloudius",
 		"Description": "Adds a bunch of features from Origins to Sonic 3air",
-		"ModVersion": "1.0"
+		"ModVersion": "1.1"
+	},
+	"Settings":
+	{
+		"Group1":
+		[
+			{
+				"InternalName": "I Sleep",
+				"DisplayName": "Sonic Idle Sleep",
+				"Variable": "OPG_Sonic_Sleep",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Eggheads",
+				"DisplayName": "FBZ Hanger looking up",
+				"Variable": "OPG_Hangerlook",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Chuckles the Red boulder puncher",
+				"DisplayName": "Knuckles laughing in LRZ",
+				"Variable": "OPG_KnucklesChuckle",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			}
+		]
 	}
 }
