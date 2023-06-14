@@ -1,3 +1,11 @@
+// Hangcarriers
+//# address-hook(0x04703e) end(0x04717c)
+function void fn04703e()
+{
+    base.fn04703e()
+    OPG_Use0x90()
+}
+
 // Red Eye SFX
 //# address-hook(0x07ea3c) end(0x07ea66)
 function void fn07ea3c()
@@ -33,4 +41,254 @@ function void fn080dbe()
     base.fn080dbe()
     if (u8[0xffffeec6] == 0xff)
         playSound(0x91)
+}
+
+// Clean up the code below here
+// Also, possibly implement a way to measure character hit box sizes instead of relying on character checks
+
+global bool IsP2OnTheRightSide
+
+// initialize DEZ act 2 transition
+//# address-hook(0x07e26a) end(0x07e292)
+function void fn07e26a()
+{
+    if (getNumPlayers() != 2)
+    {
+        base.fn07e26a()
+        return
+    }
+
+	if (level.wait_for_results)
+		return
+
+    player2.control_override = 0xff // Let the game take control of player 2
+
+    IsP2OnTheRightSide = (u16[0xffffb04a + 0x10] >= 0x0140) ? true : false
+    base.fn07e26a()
+}
+
+function bool CheckP1Location()
+{
+    D0.u16 = 0x0140		// Note that this is *not* referring to the screen width, but an actual fixed position
+	if ((objA0.flags38 & 0x08) == 0)
+	{
+		if (D0.u16 > objA1.position.x.u16)
+		{
+			D1 = 0
+			if (u8[A1 + 0x2a] & char.flag.PUSHING)
+			{
+				D1.u16 |= 0x4040		// CONTROL_A, CONTROL_A
+			}
+			D1.u16 |= 0x0808		// CONTROL_RIGHT, CONTROL_RIGHT
+			control.player1 = D1.u16
+			return false
+		}
+	}
+	else
+	{
+		if (D0.u16 < objA1.position.x.u16)
+		{
+			D1 = 0
+			if (u8[A1 + 0x2a] & char.flag.PUSHING)
+			{
+				D1.u16 |= 0x4040		// CONTROL_A, CONTROL_A
+			}
+			D1.u16 |= 0x0404		// CONTROL_LEFT, CONTROL_LEFT
+			control.player1 = D1.u16
+			return false
+		}
+	}
+
+    if (objA1.position.x.u16 == D0.u16 && objA1.velocity.x == 0)
+        return true
+	objA1.position.x.u16 = D0.u16
+	StopObjectA1()
+	control.player1 = 0
+    return false
+}
+
+function bool CheckP2Location()
+{
+    D0.u16 = 0x0140		// Note that this is *not* referring to the screen width, but an actual fixed position
+	if (!IsP2OnTheRightSide)
+	{
+		if (D0.u16 > objA1.position.x.u16)
+		{
+			D1 = 0
+			if (u8[A1 + 0x2a] & char.flag.PUSHING)
+			{
+				D1.u16 |= 0x4040		// CONTROL_A, CONTROL_A
+			}
+			D1.u16 |= 0x0808		// CONTROL_RIGHT, CONTROL_RIGHT
+			control.player2 = control.tails = D1.u16
+			return false
+		}
+	}
+	else
+	{
+		if (D0.u16 < objA1.position.x.u16)
+		{
+			D1 = 0
+			if (u8[A1 + 0x2a] & char.flag.PUSHING)
+			{
+				D1.u16 |= 0x4040		// CONTROL_A, CONTROL_A
+			}
+			D1.u16 |= 0x0404		// CONTROL_LEFT, CONTROL_LEFT
+			control.player2 = control.tails = D1.u16
+			return false
+		}
+	}
+
+    if (objA1.position.x.u16 == D0.u16 && objA1.velocity.x == 0)
+        return true
+    objA1.position.x.u16 = D0.u16
+	StopObjectA1()
+	control.player2 = control.tails = 0
+    return false
+}
+
+// Beginning of the DEZ act 2 transition 
+//# address-hook(0x07e298) end(0x07e340)
+function void fn07e298()
+{
+    if (getNumPlayers() != 2)
+    {
+        base.fn07e298()
+        return
+    }
+    bool P1IsHere
+    bool P2IsHere
+
+	A1 = 0xffffb000
+    P1IsHere = CheckP1Location() // Check if player 1 is at the center of the teleporter
+
+    A1 = 0xffffb04a // Makes player 2 go to the center with player 1
+    P2IsHere = CheckP2Location()
+
+    if (P1IsHere && P2IsHere) // If bother are at the center, continue the sequence
+        base.fn07e298()
+}
+
+// Around the time you land on the platform
+//# address-hook(0x07e384) end(0x07e3c8)
+function void fn07e384()
+{
+    bool FallForAllCheck = (Mods.isModActive("Falling sprites for all") && System.getGlobalVariableValueByName("FSFA_Uncurled"))
+	A1 = 0xffffb000
+    objA1.state = (FallForAllCheck) ? 0x36 : char.state.RUNNING
+    objA1.groundspeed = 0x5a0 // have the characters running animation speed up when falling
+
+    if (getNumPlayers() == 2)
+    {
+        A1 = 0xffffb04a
+        objA1.state = (FallForAllCheck) ? 0x36 : char.state.RUNNING
+        objA1.groundspeed = 0x5a0
+        if (objA1.position.y.u16 >= 0x0360 && (u8[A1 + 0x2a] & char.flag.IN_AIR) == 0)
+        {
+            u8[A1 + 0x2e] = 0x83
+            StopObjectA1()
+            if (FallForAllCheck)
+                objA1.state = char.state.STANDING
+            objA1.render_flags &= ~render_flag.FLIP_X
+            objA1.flags2a |= char.flag.IN_AIR
+            objA1.flags2a &= ~(char.flag.FACING_LEFT | char.flag.PUSHING)
+        }
+    }
+
+    base.fn07e384()
+}
+
+function void fn05fd88_ForP2()
+{
+	A1 = 0xffffb04a
+	D0.u16 = (u8[A1 + 0x38] + 1) & 0x03 // Find out which character P2 is
+	objA1.animation.sprite = u8[0x05fda0 + D0.s16] // P2 sprites
+	UpdatePlayer1SpritePatterns()
+}
+
+// P2 starting to spin
+//# address-hook(0x07eeee) end(0x07ef28)
+function void fn07eeee()
+{
+    base.fn07eeee()
+    if (getNumPlayers() == 2)
+    {
+        D0 = u8[A0 + 0x3c]
+        A1 = 0xffffb04a
+        objA1.animation.sprite = u8[0x07ef2e + D0.s16]
+        objA1.render_flags &= ~(render_flag.FLIP_X | render_flag.FLIP_Y)
+
+        D0.u8 = u8[0x07ef3a + D0.s16]
+        objA1.render_flags |= D0.u8
+
+        D0 = objA1.animation.sprite
+        UpdatePlayer1SpritePatterns()
+    }
+}
+
+// Makes it so that Player 2 is behind the device when being teleported
+//# address-hook(0x07e3ca) end(0x07e3e8)
+function void fn07e3ca()
+{
+    base.fn07e3ca()
+	if (objA0.groundspeed == 0x0300 && getNumPlayers() == 2)
+        u8[0xffffb04a + 0x0a] &= ~0x80
+}
+
+// Going up
+//# address-hook(0x07e3ec) end(0x07e41c)
+function void fn07e3ec()
+{
+    base.fn07e3ec()
+    if (getNumPlayers() == 2)
+        u16[0xffffb04a + 0x14] -= 0x10
+}
+
+// Follow P1 up the teleporter
+//# address-hook(0x07e44c) end(0x07e4a0)
+function void fn07e44c()
+{
+    base.fn07e44c()
+    if (getNumPlayers() == 2)
+    {
+        A2 = 0xffffb04a
+        u16[A2 + 0x10] = objA0.position.x.u16
+        u16[A2 + 0x14] = objA0.position.y.u16
+    }
+}
+
+// After the characters exit the teleporter and DEZ act 2 begins
+//# address-hook(0x07e420) end(0x07e446)
+function void fn07e420()
+{
+    base.fn07e420()
+	if (objA0.velocity.y >= 0)
+	{
+		objA1.flags2e = 0
+        objA1.groundspeed = 0x5a0
+		objA1.state = char.state.RUNNING
+		objA1.state.former = char.state.STANDING
+        if (getNumPlayers() == 2)
+        {
+            fn05fd88_ForP2()
+            A1 = 0xffffb04a
+            objA1.flags2e = 0
+            objA1.groundspeed = 0x5a0
+            objA1.state = char.state.RUNNING
+            objA1.state.former = char.state.STANDING
+        }
+	}
+}
+
+// P2 regains control
+//# address-hook(0x07e4a2) end(0x07e4c8)
+function void fn07e4a2()
+{
+    base.fn07e4a2()
+    if (getNumPlayers() == 2)
+    {
+        tails.control_counter = 1 // here so that the Tails AI doesn't sit around when the level starts
+        // Setting it to 0 will make him jump when the level starts
+        u8[0xffffb04a + 0x2e] = 0
+    }
 }

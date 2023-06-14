@@ -6,13 +6,13 @@ function void fn03aa5a()
 	A1 = 0xffffb000
 	D0.u16 = control.player1
 	fn03aa7e()
-	OPG_Use0x90()
+    OPG_Use0x90()
 
 	A1 = 0xffffb04a
 	++A2
 	D0.u16 = control.tails
 	fn03aa7e()
-	OPG_Use0x90()
+    OPG_Use0x90()
 
 	CheckForUnloadObject()
 }
@@ -24,7 +24,7 @@ function void fn03a8b8()
     OPG_Use0x90()
 }
 
-function void OPG_Use0x90()
+function void OPG_Use0x90() // also references in OPG_LBZ and OPG_DEZ
 {
     if (u8[A1 + 0x22] == 0x91 && debug_mode.state == 0)
         u8[A1 + 0x22] = 0x90

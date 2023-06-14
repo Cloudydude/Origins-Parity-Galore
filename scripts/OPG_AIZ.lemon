@@ -1,9 +1,11 @@
+global bool OPG_AIZBombing
+
 // Have the firebombing sequence playout like it does in Origins
 // part 1
 //# address-hook(0x0685b8) end(0x0685b8)
 function void fn0685b8()
 {
-    if (Mods.isModActive("Stone 3 A.I.R."))
+    if (Mods.isModActive("Stone 3 A.I.R.") || !OPG_AIZBombing)
     {
         base.fn0685b8()
         return
@@ -34,7 +36,7 @@ function void fn0685b8()
 //# address-hook(0x06852c) end(0x068550)
 function void fn06852c()
 {
-    if (Mods.isModActive("Stone 3 A.I.R."))
+    if (Mods.isModActive("Stone 3 A.I.R.") || !OPG_AIZBombing)
     {
         base.fn06852c()
         return
@@ -72,6 +74,9 @@ function void fn06852c()
 
 	D0.s16 = objA1.position.x.u16
 
+	if (u8[0xffffb04a + 0x2a] & char.flag.PUSHING) // Check in case player 2 is pushing against something
+		control.player2 = control.tails = 0x4040
+
 	if (abs(D0.s16) == 12259)
 	{
 		StopObjectA1()
@@ -87,6 +92,8 @@ function void fn06852c()
 	{
 		D1 = (D0.s16 > 12259) ? 2 : 3		// CONTROL_LEFT : CONTROL_RIGHT
 		control.player1.state |= (1 << D1.u8)
+		if (u8[A1 + 0x2a] & char.flag.PUSHING) // Check in case player 1 is pushing against something
+			control.player1 = 0x4040
 	}
 }
 

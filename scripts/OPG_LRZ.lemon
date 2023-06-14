@@ -8,7 +8,7 @@ function void fn059fc4()
         return
     }
 
-    if (allocDynamicObjectStd())
+    if (allocDynamicObjectStd() && !checkpoint.number)
     {
         objA1.update_address = 0x204300
         u8[A1 + 0x04] = (render_flag.WORLD)
