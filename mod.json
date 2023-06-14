@@ -4,7 +4,7 @@
 		"Name": "Origins Parity Galore",
 		"Author": "iCloudius",
 		"Description": "Adds a bunch of features from Origins to Sonic 3air",
-		"ModVersion": "1.1"
+		"ModVersion": "1.2"
 	},
 	"Settings":
 	{
@@ -38,6 +38,18 @@
 				"InternalName": "Chuckles the Red boulder puncher",
 				"DisplayName": "Knuckles laughing in LRZ",
 				"Variable": "OPG_KnucklesChuckle",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Something Whitty",
+				"DisplayName": "Origins AIZ Bombing",
+				"Variable": "OPG_AIZBombing",
 				"DefaultValue": "1",	
 				"Category": "Mod Options",			
 				"Options":
