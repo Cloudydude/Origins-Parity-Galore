@@ -1,0 +1,88 @@
+// Have characters use animation 0x90 instead of 0x91 when on the FBZ monkey bars
+//# address-hook(0x03aa5a) end(0x03aa78)
+function void fn03aa5a()
+{
+	A2 = A0 + 0x30
+	A1 = 0xffffb000
+	D0.u16 = control.player1
+	fn03aa7e()
+    OPG_Use0x90()
+
+	A1 = 0xffffb04a
+	++A2
+	D0.u16 = control.tails
+	fn03aa7e()
+    OPG_Use0x90()
+
+	CheckForUnloadObject()
+}
+
+//# address-hook(0x03a8b8) end(0x03aa58)
+function void fn03a8b8()
+{
+    base.fn03a8b8()
+    OPG_Use0x90()
+}
+
+function void OPG_Use0x90() // also references in OPG_LBZ and OPG_DEZ
+{
+    if (u8[A1 + 0x22] == 0x91 && debug_mode.state == 0)
+        u8[A1 + 0x22] = 0x90
+}
+
+// Signpost renders in-front of gapsule
+//# address-hook(0x0837d8) end(0x08382e)
+function void fn0837d8()
+{
+    base.fn0837d8()
+    if (global.zone_act == 0x0400) // Only do this in FBZ
+		objA0.sprite_priority = 0x180
+}
+
+//FBZ2 Egg Hanger
+// Makes the egg boys look up at the player when they're between their mits
+//# address-hook(0x067be6) end(0x067c36)
+function void fn067be6()
+{
+    base.fn067be6()
+    if (OPG_Hangerlook)
+    {
+        CheckDistanceToPlayer1()
+        objA0.subtype2c = (D2.u16 <= 0x20) ? 0x01 : 0x00
+    }
+}
+
+// Custom function that only checks the distance-x between an enemy/boss for Player 1
+function void CheckDistanceToPlayer1()
+{
+	// Outputs:
+	//  - A1:     RAM address of closest player (0xffffb000 or 0xffffb04a)
+	//  - D0:     Relative position-x of the player: 0 = left, 2 = right
+	//  - D1:     Relative position-y of the player: 0 = above, 2 = below
+	//  - D2.u16: Distance-x to closest player (abs value)
+	//  - D3.u16: Distance-y to closest player (abs value)
+
+	// Check distance-x to both players
+	A1 = 0xffffb000
+	// A2 = 0xffffb04a
+	D2.s16 = objA0.position.x.u16 - objA1.position.x.u16
+	// D3.s16 = objA0.position.x.u16 - u16[A2 + 0x10]
+
+	D0 = (D2.s16 < 0) ? 2 : 0
+	D1 = (D3.s16 < 0) ? 2 : 0
+	D2.u16 = abs(D2.s16)
+	// D3.u16 = abs(D3.s16)
+
+	// Which one is closer?
+	if (D3.u16 < D2.u16)
+	{
+		A1 = A2
+		D0 = D1
+		D2.u16 = D3.u16
+	}
+
+	// Check distance-y to the closest player
+	// D3.s16 = objA0.position.y.u16 - objA1.position.y.u16
+	// D1 = (D3.s16 < 0) ? 2 : 0
+	// D3.u16 = abs(D3.s16)
+}
