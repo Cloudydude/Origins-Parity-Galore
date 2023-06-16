@@ -80,6 +80,6 @@ function void Character.Die_noSound()
 // part 4
 function void DeactivateSuper()
 {
-    if (super.active || super.active.tails)
+    if A0 == 0xffffb000 && (super.active || super.active.tails)
         Character.cancelSuperTransformation()
 }
