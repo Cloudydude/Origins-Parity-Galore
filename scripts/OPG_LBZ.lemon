@@ -68,6 +68,7 @@ function void fn0746d8()
     objA0.value3b = (objA0.position.y.u16 >= IsEggyAtTheBottom) ? 1 : 0
 }
 
+global u8 OPG_EggTimer
 // part 2
 //# address-hook(0x0746f4) end(0x074734)
 function void fn0746f4()
@@ -81,7 +82,7 @@ function void fn0746f4()
         MoveWithGravity20()
         UpdateMovementStraightSimple()
 
-        if (!objA0.state)
+        if (!OPG_EggTimer)
         {
             objA0.velocity.x = (objA0.subtype2c) ? 0x103 : -0x103
             objA0.velocity.y = -0x150
@@ -90,17 +91,17 @@ function void fn0746f4()
             {
                 ++objA0.value3b
                 if (objA0.value3b >= 20)
-                    objA0.state++
+                    OPG_EggTimer++
             }
             else
-                objA0.state++
+                OPG_EggTimer++
         }
-        else if (objA0.state == 1)
+        else if (OPG_EggTimer == 1)
         {
             CheckGroundCollision()
             if (D1.s16 <= 15)
             {
-                objA0.state++
+                OPG_EggTimer++
                 objA0.position.y.u16 -= D1.s16
                 objA0.velocity.x = (objA0.subtype2c) ? 0x80 : -0x80
                 objA0.velocity.y = -0x150
