@@ -46,6 +46,8 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
         // This is realted to the tops in MGZ
         u8[0xffffEF7E] = 0 // P1
         u8[0xffffEF7F] = 0 // P2
+        // Eggbois timer
+        OPG_EggTimer = 0
     }
 
     u64 key = 0
