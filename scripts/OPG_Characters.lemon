@@ -19,19 +19,25 @@ function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationS
 				u8 animation = ((global.framecounter >> 4) % (2))
 				key = stringformat("Sonic_Sleep_%d", animation)
 				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, animation + 0xbf, 0x00)
+					key = stringformat("character_sonic_0x%x", animation + 0xbf)
+				if (!Renderer.hasCustomSprite(key))
+					return Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, animation + 0xbf, 0x00)
 			}
 			else if (SonicGoesToSleepCounter >= 3149 && SonicGoesToSleepCounter <= 3174) // Lower head part 1
 			{
 				key = "Sonic_Sleep_2"
 				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc1, 0x00)
+					key = "character_sonic_0xc1"
+				if (!Renderer.hasCustomSprite(key))
+					return Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc1, 0x00)
 			}
 			else if (SonicGoesToSleepCounter >= 3175) // Lower head part 2
 			{
 				key = "Sonic_Sleep_3"
 				if (!Renderer.hasCustomSprite(key))
-					key = Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc2, 0x00)
+					key = "character_sonic_0xc2"
+				if (!Renderer.hasCustomSprite(key))
+					return Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc2, 0x00)
 			}
 
 			return key
