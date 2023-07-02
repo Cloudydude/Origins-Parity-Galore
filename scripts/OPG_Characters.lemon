@@ -89,3 +89,10 @@ function void DeactivateSuper()
     if A0 == 0xffffb000 && (super.active || super.active.tails)
         Character.cancelSuperTransformation()
 }
+
+// part 5
+function void Character.UpdateDrownedState.shared()
+{
+	DeactivateSuper()
+	base.Character.UpdateDrownedState.shared()
+}
