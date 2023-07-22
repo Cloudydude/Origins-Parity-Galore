@@ -1,0 +1,10 @@
+{
+	"slots_display_0x00":  { "File": "slots.png", "Rect": "0, 0, 32, 32", "Center": "16, 16" },  // Jackpot
+	"slots_display_0x01":  { "File": "slots.png", "Rect": "33, 0, 32, 32", "Center": "16, 16" }, // Sonic
+	"slots_display_0x02":  { "File": "slots.png", "Rect": "66, 0, 32, 32", "Center": "16, 16" }, // Tails
+	"slots_display_0x03":  { "File": "slots.png", "Rect": "99, 0, 32, 32", "Center": "16, 16" }, // Knux
+	"slots_display_0x04":  { "File": "slots.png", "Rect": "0, 33, 32, 32", "Center": "16, 16" },  // Robotnik
+	"slots_display_0x05":  { "File": "slots.png", "Rect": "33, 33, 32, 32", "Center": "16, 16" }, // Ring
+	"slots_display_0x06":  { "File": "slots.png", "Rect": "66, 33, 32, 32", "Center": "16, 16" }, // Bar
+	"slots_display_0x07":  { "File": "slots.png", "Rect": "99, 33, 32, 32", "Center": "16, 16" }  // Super (Unused)
+}
