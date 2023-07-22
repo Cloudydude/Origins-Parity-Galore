@@ -1,0 +1,41 @@
+// Major thanks to Lave SIime for the slot machine code
+//# address-hook(0x04c3f0) end(0x04c3f8)
+function void BonusSM.UpdateSlotMachine()
+{
+	base.BonusSM.UpdateSlotMachine()
+	
+	// rendering sprites here is such a bad idea.. but the slots display is updated *after* sprites are normally drawn, so
+	// honestly dangggg this really sucks :(
+	
+	// 0xffffb128 is the address of the slots catcher object, we're drawing based on its position
+	s16 px = u16[0xffffb128 + 0x10] - camera.foreground.x.u16
+	s16 py = u16[0xffffb128 + 0x14] - camera.foreground.y.u16
+	
+	// First, set up the sprite masks
+	Renderer.addSpriteMask(px - 48, py - 97, 96, 33, 0x8001, false) // Top
+	Renderer.addSpriteMask(px - 48, py - 32, 96, 33, 0x8001, false) // Bottom
+	
+	px -= 32
+	
+	// Now, let's render those slots!
+	for (u8 i = 0; i < 3; i++)
+	{
+		u32 slotAddress = 0xffffe408 + 0x06 + (i << 2) // 0xffffe408 is addr of base slots data, 0x06 is offset for icon index
+		u32 sequenceAddress = 0x04c8cc + (i << 3)
+		
+		u8 slot = u8[slotAddress] & 0x07
+		s16 py0 = py - 48 - ((u16[slotAddress] & 0xf8) >> 3)
+		
+		Renderer.drawCustomSprite(SlotsCustomiser.getIconSpriteKey(u8[sequenceAddress + slot] & 0x07), px, py0, 0x00, 0x00, 0x8000)
+		slot = (slot+1) & 0x07
+		Renderer.drawCustomSprite(SlotsCustomiser.getIconSpriteKey(u8[sequenceAddress + slot] & 0x07), px, py0 + 32, 0x00, 0x00, 0x8000)
+		
+		px += 32
+	}
+}
+
+function string SlotsCustomiser.getIconSpriteKey(u8 slot)
+{
+	// Separated into a new function to help facilitate modding :D
+	return stringformat("slots_display_0x%02x", slot)
+}

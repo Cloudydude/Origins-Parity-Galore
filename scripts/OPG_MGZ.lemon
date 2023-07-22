@@ -27,8 +27,20 @@ function void fn025d9c()
             if (D0.u8 != 0)
             {
                 A1 = 0xffffb000
-                if (objA1.state == char.state.SPINDASH)
+                if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
                 {
+                    if (objA1.state.former == char.state.SONIC_DROPDASH)
+                    {
+
+                        u16[A0 + 0x30] = 0x3c
+                        u8[A0 + 0x32] = 1
+                        D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
+                        if (D0.u8 == 0)
+                        {
+                            u8[A0 + 0x32] = 0xff
+                        }
+                        objA1.state = char.state.SONIC_DROPDASH
+                    }
                     if (u8[A5 + 0x2c] == 1)
                     {
                         playSound(0x8e) // Plays a new sound
@@ -43,8 +55,20 @@ function void fn025d9c()
             if (D6.u8 != 0)
             {
                 A1 = 0xffffb04a
-                if (objA1.state == char.state.SPINDASH)
+                if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
                 {
+                    if (objA1.state.former == char.state.SONIC_DROPDASH)
+                    {
+
+                        u16[A0 + 0x30] = 0x3c
+                        u8[A0 + 0x32] = 1
+                        D0.u8 = (u8[A1 + 0x2a] + objA0.flags2a) & 0x01
+                        if (D0.u8 == 0)
+                        {
+                            u8[A0 + 0x32] = 0xff
+                        }
+                        objA1.state = char.state.SONIC_DROPDASH
+                    }
                     if (u8[A6 + 0x2c] == 1)
                     {
                         playSound(0x8e) // Plays a new sound
@@ -64,11 +88,16 @@ function void fn025d9c()
 //# address-hook(0x025ea6) end(0x025f0c)
 function void fn025ea6()
 {
+    base.fn025ea6()
     if (!isSawnic())
     {
         playSound(0x8e)
+        if (objA1.state == char.state.SONIC_DROPDASH && !isSawnic())
+        {
+            u8[A1 + 0x40] = 1 // re-enable double jump state
+            u8[A1 + 0x2f] = 1 // re-enable jump flag
+        }
     }
-    base.fn025ea6()
 }
 
 // Makes the characters play the running rotation animation in the halls of MGZ, while on the tops

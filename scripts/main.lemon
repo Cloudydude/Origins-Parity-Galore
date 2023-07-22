@@ -10,6 +10,7 @@ include OPG_MHZ
 include OPG_LRZ
 include OPG_SSZ
 include OPG_DEZ
+include OPG_SlotMachine
 
 global bool OPG_Hangerlook
 global bool OPG_KnucklesChuckle
