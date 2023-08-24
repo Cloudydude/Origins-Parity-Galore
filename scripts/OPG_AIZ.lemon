@@ -114,10 +114,11 @@ function void fn068a6e()
 {
     D5.u16 = (camera.position.y.u16 >= 0x03a0) ? 0x10c0 : 0x10e0
     D5.u16 -= getScreenExtend()
+    A1 = 0xffffb000
+    if (objA1.flags2a & char.flag.IN_AIR)
+        return
     if (camera.position.x.u16 >= D5.u16)
-    {
         level.vertical_wrap = camera.position.y.u16
-    }
     base.fn068a6e()
 }
 
