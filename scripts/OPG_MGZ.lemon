@@ -274,6 +274,7 @@ function void fn05180a()
         A1 = 0xffffb000
         u8[A1 + 0x20] = char.state.BALANCING1
         u8[A1 + 0x2e] = 0x01
+	u8[A1 + 0x3d] = 0 // disables spindash dust if player 1 is charging a spindash
     }
 
     if (getNumPlayers() == 2)
@@ -283,6 +284,7 @@ function void fn05180a()
             A1 = 0xffffb04a
             u8[A1 + 0x20] = char.state.BALANCING1
             u8[A1 + 0x2e] = 0x01
+            u8[A1 + 0x3d] = 0 // disables spindash dust if player 2 is charging a spindash
         }
     }
 }
