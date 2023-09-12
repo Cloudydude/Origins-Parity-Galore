@@ -108,6 +108,28 @@ function void fn0866cc()
 
 // Thank you feelinfungal
 
+// Unlock speed when going up the tree in AIZ act 1
+//# address-hook(0x01f8b4)
+function void fn01f8b4()
+{
+    s16 objA1.velocity.x_backup = objA1.velocity.x
+    base.fn01f8b4()
+    objA1.velocity.x = objA1.velocity.x_backup
+}
+
+// Makes it so that you can roll under the spikes in the first 
+// part of act 1 when it catches fire
+//# address-hook(0x023f84) end(0x024022)
+function void Spikes.Init()
+{
+    base.Spikes.Init()
+    if (global.zone_act == 0x0001 && global.zone_act.apparent == 0x0000 && objA0.subtype2c == 0x02)
+    {
+        u16[A0 + 0x38] = 0x3c
+        objA0.box_size.y -= 1
+    }
+}
+
 // The camera during the first boss in AIZ stays locked in-place
 //# address-hook(0x068a6e) end(0x068a90)
 function void fn068a6e()
