@@ -265,7 +265,7 @@ function void OriginsObjects()
 		}
         DrawOrUnloadObject()
     }
-    else if (objA0.subtype2c == 0x07) // Snow graphic at the beginning of ICZ act 1
+    else if (objA0.subtype2c == 0x07) // Teleporter during the thief cutscene in HPZ
     {
         objA0.box_size.y = 0x10
         objA0.box_size.x = 0x18
