@@ -1,0 +1,21 @@
+//# address-hook(0x05a12e) end(0x05a152)
+function void InitLevelTiles.HPZ()
+{
+    if (allocDynamicObjectStd())
+    {
+        objA1.update_address = 0x204300
+        objA1.subtype2c = 0x07
+        objA1.position.x.u16 = 0x1640
+        objA1.position.y.u16 = 0x03c7
+        objA1.sprite_attributes = 0x0488
+        u8[A1 + 0x04] = (render_flag.WORLD)
+    }
+    base.InitLevelTiles.HPZ()
+}
+
+//# address-hook(0x05a20c) end(0x05a210)
+function void UpdateLevelScrolling.HPZ()
+{
+    u16[0xfffffc00 + 0x14 * 2] = 0x0408 // This is here for the teleporter in the thief cutscene
+    base.UpdateLevelScrolling.HPZ()
+}
