@@ -13,5 +13,6 @@
 	"ICZ_Snow_4":  { "File": "ICZ Snow.bmp", "Rect": "0,40,32,32", "Center": "16,16" },
 	"ICZ_Snow_5":  { "File": "ICZ Snow.bmp", "Rect": "40,40,32,32", "Center": "16,16" },
 	"ICZ_Snow_6":  { "File": "ICZ Snow.bmp", "Rect": "80,40,32,32", "Center": "16,16" },
-	"ICZ_Snow_7":  { "File": "ICZ Snow.bmp", "Rect": "120,40,32,32", "Center": "16,16" }
+	"ICZ_Snow_7":  { "File": "ICZ Snow.bmp", "Rect": "120,40,32,32", "Center": "16,16" },
+	"HPZTeleporter":  { "File": "HPZTeleporter.bmp", "Rect": "0,0,48,32", "Center": "24,16" }
 }
