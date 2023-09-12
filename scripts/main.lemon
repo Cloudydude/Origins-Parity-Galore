@@ -8,6 +8,7 @@ include OPG_LBZ
 include OPG_FBZ
 include OPG_MHZ
 include OPG_LRZ
+include OPG_HPZ
 include OPG_SSZ
 include OPG_DEZ
 include OPG_SlotMachine
@@ -100,6 +101,11 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
             if (Renderer.hasCustomSprite(key))
                 Renderer.drawCustomSprite(key, px, py, 0x00, 0x00, renderQueue + 15)
             return true
+        }
+        else if (objA0.subtype2c == 0x07)
+        {
+            Renderer.drawCustomSprite("HPZTeleporter", px, py, 0, 0x00, renderQueue + 15)
+		    return true
         }
     }
     else if (objA0.update_address == 0x063a6a && global.zone_act == 0x0901 && OPG_KnucklesChuckle)
@@ -258,6 +264,14 @@ function void OriginsObjects()
 			objA0.animation.timer = 0
 		}
         DrawOrUnloadObject()
+    }
+    else if (objA0.subtype2c == 0x07) // Snow graphic at the beginning of ICZ act 1
+    {
+        objA0.box_size.y = 0x10
+        objA0.box_size.x = 0x18
+        objA0.sprite_priority = 0x0180
+        objA0.mapping_offset = 0x046b3c
+        DrawObject()
     }
     else
     {
