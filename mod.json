@@ -4,7 +4,7 @@
 		"Name": "Origins Parity Galore",
 		"Author": "iCloudius",
 		"Description": "Adds a bunch of features from Origins to Sonic 3air",
-		"ModVersion": "1.55"
+		"ModVersion": "1.60"
 	},
 	"Settings":
 	{
@@ -20,6 +20,78 @@
 				{
 					"0": "Off",
 					"1": "On"
+				}
+			},
+			{
+				"InternalName": "AIZ Back Attack",
+				"DisplayName": "AIZ act 2 background palette",
+				"Variable": "OPG_AIZ2_BG_Pal",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "S3&K",
+					"1": "Origins"
+				}
+			},
+			{
+				"InternalName": "Infinitely Punching Echidna",
+				"DisplayName": "Knuckles pose in BS screens",
+				"Variable": "OPG_KnucklesBSPose",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Looped punching",
+					"1": "Normal victory pose"
+				}
+			},
+			{
+				"InternalName": "Benson",
+				"DisplayName": "Smooth Gumball crank",
+				"Variable": "OPG_SmoothGumballCrank",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Smooth and spiky",
+				"DisplayName": "Smooth MGZ totem spikes",
+				"Variable": "OPG_MGZTotemSpikes",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "O Canada",
+				"DisplayName": "Hey Ho explodey bits",
+				"Variable": "OPG_HeyHobits",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Believe In Myself",
+				"DisplayName": "Super Tails jump height",
+				"Variable": "OPG_STailsJumpHeight",
+				"DefaultValue": "1",	
+				"Category": "Mod Options",			
+				"Options":
+				{
+					"0": "Normal",
+					"1": "Higher"
 				}
 			},
 			{
