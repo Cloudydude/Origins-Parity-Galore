@@ -15,6 +15,8 @@ include OPG_SlotMachine
 
 global bool OPG_Hangerlook
 global bool OPG_KnucklesChuckle
+global bool OPG_SmoothGumballCrank
+global bool OPG_MGZTotemSpikes
 
 function bool isSawnic() // Check if Sawnic is active
 {
@@ -166,6 +168,142 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
             objA0.value26 = 0
 	}
 
+    if (level.boss_encounter == 1 && global.zone_act == 0x0700 && !Mods.isModActive("Stone 3 A.I.R.") && OPG_HeyHobits)
+    {
+        if (objA0.update_address == 0x085102)
+        {
+            if (objA0.subtype2c == 0x00)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Head"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Head", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x02)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Shoulder"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Shoulder", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x04)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Shoulder"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Shoulder", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue - 15)
+                return true
+            }
+            else if (objA0.subtype2c == 0x06)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Arm"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Arm", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x08)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Arm"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Arm", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue - 10)
+                return true
+            }
+            else if (objA0.subtype2c == 0x0a)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_RightHand"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_RightHand", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x0c)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_LefttHand"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_LefttHand", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue + 8)
+                return true
+            }
+            else if (objA0.subtype2c == 0x0e)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_Body"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_Body", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x10 || objA0.subtype2c == 0x12)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_JetpackTank"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_JetpackTank", px, py, 0x00, SPRITE_FLAG_PRIO, ((objA0.subtype2c == 0x12) ? (renderQueue + 3) : (renderQueue)))
+                return true
+            }
+            else if (objA0.subtype2c == 0x14)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_AxePole"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_AxePole", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue + 15)
+                return true
+            }
+            else if (objA0.subtype2c == 0x16)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_AxeHead"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_AxeHead", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+            else if (objA0.subtype2c == 0x18)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_RightTube"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_RightTube", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue + 1)
+                return true
+            }
+            else if (objA0.subtype2c == 0x1a)
+            {
+                if (Renderer.hasCustomSprite("OPG_HeyHoDead_LeftTube"))
+                    Renderer.drawCustomSprite("OPG_HeyHoDead_LeftTube", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue)
+                return true
+            }
+        }
+        else if (objA0.update_address == 0x085668 && objA0.animation.sprite == 0x14)
+        {
+            if (Renderer.hasCustomSprite("OPG_HeyHo_Sidehead"))
+                Renderer.drawCustomSprite("OPG_HeyHo_Sidehead", px, py, 0x00, SPRITE_FLAG_PRIO, renderQueue+1)
+        }
+
+    }
+
+    // Contributed by Veenee
+    u8 gameMode = global.game_mode & 0x7f
+	bool prioFlag = (objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0
+
+	if (gameMode == 0x0c || gameMode == 0x08)
+	{
+		// MGZ spike tower
+		if (objA0.update_address == 0x034728 && OPG_MGZTotemSpikes)
+		{
+			Renderer.drawVdpSprite(px-24, py-52, 0x09, sprite_attribute.PALETTE.LINE2 | 0x77, renderQueue)
+			Renderer.drawVdpSprite(px, py-52, 0x09, sprite_attribute.FLIP_X | sprite_attribute.PALETTE.LINE2 | 0x77, renderQueue)
+			for(u8 i = 0; i < 5; i++)
+			{
+				Renderer.drawCustomSprite(stringformat("spikeTower_spike_%02d", ((level.framecounter >> 1) + 4 * i) % 16), px, py, 0x20, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+				Renderer.drawCustomSprite(stringformat("spikeTower_tower_%02d", ((level.framecounter >> 2) + 2 * i) % 4), px, py, 0x20, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+				py+=16
+			}
+
+			return true
+		}
+
+		// Gumball machine crank
+		if (objA0.update_address == 0x060d1e && OPG_SmoothGumballCrank)
+		{
+			bool flipXFlag = (objA0.render_flags & render_flag.FLIP_X) != 0
+			u8 angle = 0x08 * (3-objA0.animation.timer)
+			if (flipXFlag)
+				angle = -angle
+			if (objA0.animation.sprite == 0x14)
+				flipXFlag = !flipXFlag
+			u8 flags = (prioFlag ? SPRITE_FLAG_PRIO : 0) | (flipXFlag ? SPRITE_FLAG_FLIP_X : 0)
+
+			Renderer.drawCustomSprite(stringformat("gumball_joint_%02d", (objA0.animation.sprite == 0x14) ? 1 : objA0.animation.sprite-5), px, py, 0x10, flags, renderQueue)
+			Renderer.drawCustomSprite(stringformat("gumball_crank_%02d", (objA0.animation.sprite == 0x14) ? 1 : objA0.animation.sprite-5), px, py, 0x10, flags, renderQueue, angle, -1)
+			
+			// Fix for the crank overturning
+			bool isHorizontal = (objA0.animation.sprite == 5 && objA0.animation.timer == 3)
+			if (isHorizontal && objA0.value3e)
+				objA0.value3e = 0
+			else if (isHorizontal && !objA0.value3e)
+				objA0.animation.timer = 0
+			return true
+		}
+	}
+
     return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
 }
 
@@ -278,4 +416,18 @@ function void OriginsObjects()
         base.OriginsObjects()
         return
     }
+}
+
+// Contributed by Veenee
+// Gumball Machine
+//# address-hook(0x060cb8) end(0x060d10)
+function void fn060cb8()
+{
+    if (OPG_SmoothGumballCrank)
+    {
+        objA0.value3e = 1
+        if (s8(objA0.animation.timer) < 3)
+            objA0.animation.timer = 3
+    }
+	base.fn060cb8()
 }
