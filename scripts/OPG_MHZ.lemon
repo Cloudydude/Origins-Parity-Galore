@@ -1,5 +1,87 @@
 global u16 satellite_Xcords
 global u16 satellite_Ycords
+global bool OPG_HeyHobits
+
+// Hey Ho defeated
+//# address-hook(0x075d80) end(0x075dfc)
+function void fn075d80()
+{
+    if (Mods.isModActive("Stone 3 A.I.R.") || !OPG_HeyHobits)
+    {
+        base.fn075d80()
+        return
+    }
+
+	if (u8[A0 + 0x28] != 0)
+		return
+
+	base.fn075d80()
+
+	D0.u8 = boss.remaining_hits
+	if (D0.u8 == 0)
+	{		
+		// Boss beaten
+		objA0.animation.sprite = 0x13
+        objA0.animation.timer = 5
+        objA0.countdown_callback = 0x068c02
+        objA0.velocity.x = 0
+        objA0.velocity.y = 0
+		return
+	}
+}
+
+// Turn Hey Ho around
+//# address-hook(0x085668) end(0x085692)
+function void fn085668()
+{
+    base.fn085668()
+    if (level.boss_encounter == 1 && global.zone_act == 0x0700 && objA0.countdown_value < 0x40 && !Mods.isModActive("Stone 3 A.I.R.") && OPG_HeyHobits)
+    {
+        if (objA0.animation.sprite != 0 && objA0.animation.sprite < 0x15)
+        {
+            --objA0.animation.timer
+            if (objA0.animation.timer == 0)
+            {
+                ++objA0.animation.sprite
+                objA0.animation.timer = 3
+            }
+            if (objA0.animation.sprite == 0x15)
+                objA0.animation.sprite = 0
+        }
+    }
+}
+
+// This function is used for Fire breath when he splits into pieces
+// But we're gonna use this for Hey Ho to do the same thing
+//# address-hook(0x068c02) end(0x068c0c)
+function void fn068c02()
+{
+	if (level.boss_encounter == 1 && global.zone_act == 0x0700 && !Mods.isModActive("Stone 3 A.I.R.") && OPG_HeyHobits)
+	{
+		fn085ba8()
+
+		// Spawn boss giblets
+		// "spawnChildObjects(0x06910c)" replaced by:
+		spawnChildObject(0x068e98, 0x00, -2, -7) // Head
+		spawnChildObject(0x068e98, 0x02, 8, 7) // Shoulder right
+		spawnChildObject(0x068e98, 0x04, -14, 7) // Shoulder left
+		spawnChildObject(0x068e98, 0x06, 11, 24) // Arm right
+
+		spawnChildObject(0x068e98, 0x08, -11, 24) // Arm Left
+		spawnChildObject(0x068e98, 0x0a, -27, 42) // Hand right
+		spawnChildObject(0x068e98, 0x0c, 13, 43) // Hand left
+		spawnChildObject(0x068e98, 0x0e, -11, 10) // Body
+		spawnChildObject(0x068e98, 0x10, -7, 2) // Jetpack tank
+		spawnChildObject(0x068e98, 0x12, 18, 2) // Jetpack tank
+		spawnChildObject(0x068e98, 0x14, -11, 46) // Axe pole
+		spawnChildObject(0x068e98, 0x16, -38, 44) // Axe head
+		spawnChildObject(0x068e98, 0x18, 7, 17) // Tube right
+		spawnChildObject(0x068e98, 0x1a, -9, 13) // Tube left
+		return
+	}
+
+	base.fn068c02()
+}
 
 // Broken Satellite Dish
 //# address-hook(0x07603e) end(0x076060)
