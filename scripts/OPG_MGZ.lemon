@@ -27,7 +27,7 @@ function void fn025d9c()
             if (D0.u8 != 0)
             {
                 A1 = 0xffffb000
-                if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
+                if (objA1.state == char.state.SPINDASH || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state.former == char.state.SONIC_DROPDASH))
                 {
                     if (objA1.state.former == char.state.SONIC_DROPDASH)
                     {
@@ -55,7 +55,7 @@ function void fn025d9c()
             if (D6.u8 != 0)
             {
                 A1 = 0xffffb04a
-                if (objA1.state == char.state.SPINDASH || objA1.state.former == char.state.SONIC_DROPDASH)
+                if (objA1.state == char.state.SPINDASH || (u8[A1 + 0x38] == CHARACTER_SONIC && objA1.state.former == char.state.SONIC_DROPDASH))
                 {
                     if (objA1.state.former == char.state.SONIC_DROPDASH)
                     {
@@ -92,7 +92,7 @@ function void fn025ea6()
     if (!isSawnic())
     {
         playSound(0x8e)
-        if (objA1.state == char.state.SONIC_DROPDASH && !isSawnic())
+        if (objA1.state == char.state.SONIC_DROPDASH && u8[A1 + 0x38] == CHARACTER_SONIC)
         {
             u8[A1 + 0x40] = 1 // re-enable double jump state
             u8[A1 + 0x2f] = 1 // re-enable jump flag
