@@ -11,19 +11,21 @@ function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationS
 	{
 		if (char.state == char.state.STANDING) // Only when Sonic is standing, and not being controlled by the game
 		{
-			if (SonicGoesToSleepCounter < 3176)
+			if (SonicGoesToSleepCounter < 3239)
 				SonicGoesToSleepCounter++
-			
-			if (SonicGoesToSleepCounter >= 2896 && SonicGoesToSleepCounter <= 3148) // Slow foot tap
+
+
+			if (SonicGoesToSleepCounter >= 2911 && SonicGoesToSleepCounter <= 3206) // Slower foot tap
 			{
-				u8 animation = ((global.framecounter >> 4) % (2))
+				u8 speed = (SonicGoesToSleepCounter >= 2911 && SonicGoesToSleepCounter <= 3059) ? 4 : 5
+				u8 animation = ((global.framecounter >> speed) % (2))
 				key = stringformat("Sonic_Sleep_%d", animation)
 				if (!Renderer.hasCustomSprite(key))
 					key = stringformat("character_sonic_0x%x", animation + 0xbf)
 				if (!Renderer.hasCustomSprite(key))
 					return Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, animation + 0xbf, 0x00)
 			}
-			else if (SonicGoesToSleepCounter >= 3149 && SonicGoesToSleepCounter <= 3174) // Lower head part 1
+			else if (SonicGoesToSleepCounter >= 3207 && SonicGoesToSleepCounter <= 3237) // Lower head part 1
 			{
 				key = "Sonic_Sleep_2"
 				if (!Renderer.hasCustomSprite(key))
@@ -31,7 +33,7 @@ function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationS
 				if (!Renderer.hasCustomSprite(key))
 					return Renderer.setupCustomCharacterSprite(0x100000, 0x148182, 0x146620, 0xc1, 0x00)
 			}
-			else if (SonicGoesToSleepCounter >= 3175) // Lower head part 2
+			else if (SonicGoesToSleepCounter >= 3238) // Lower head part 2
 			{
 				key = "Sonic_Sleep_3"
 				if (!Renderer.hasCustomSprite(key))
@@ -95,4 +97,49 @@ function void Character.UpdateDrownedState.shared()
 {
 	DeactivateSuper()
 	base.Character.UpdateDrownedState.shared()
+}
+
+global bool OPG_STailsJumpHeight
+
+// Tails jumps higher when he's super/hyper
+//# translated(0x0117da) end(0x0118ba)
+//# translated(0x015002) end(0x0150d8)
+//# translated(0x017710) end(0x0177e8)
+function bool Character.CheckStartJump()
+{
+	if (!OPG_STailsJumpHeight)
+		return base.Character.CheckStartJump()
+
+	u8 backupChar = char.character
+	u8 super = super.active
+    if (char.character == CHARACTER_TAILS && super.active.tails && !u8[0xffffe654])
+	{
+        char.character = CHARACTER_SONIC
+		super.active = true
+	}
+    bool result = base.Character.CheckStartJump()
+    char.character = backupChar
+	super.active = super
+    return result
+}
+
+// Thank you feelinfungal
+
+global bool OPG_KnucklesBSPose
+// Change Knuckles to always use victory sprite instead of punching the air in the Blue Spheres Congratulations! screen
+//# address-hook(0x04e000) end(0x04e00c)
+function void fn04e000()
+{
+    base.fn04e000()
+	if (OPG_KnucklesBSPose)
+    	objA0.animation.sprite = 0xb4
+}
+
+// Make Knuckles use the standard win pose animation for the Blue Spheres Difficulty screen
+//# address-hook(0x04e2b8) end(0x04e2ea)
+function void fn04e2b8()
+{
+    base.fn04e2b8()
+	if (OPG_KnucklesBSPose)
+    	objA0.state = char.state.WIN_POSE
 }
