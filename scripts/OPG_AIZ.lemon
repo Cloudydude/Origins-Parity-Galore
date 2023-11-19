@@ -188,14 +188,14 @@ function void LevelPaletteUpdate.AIZ2()
 
 function void copyPaletteDataFromTable(u8 index, u16 ramAddress)
 {
-    if (index == 0x30 && global.zone_act.apparent == 0x0001 && OPG_AIZ2_BG_Pal) // Override base game AIZ2 bomber sky palette
+    if ((camera.update_routine == 0x08 || camera.update_routine == 0x18) && index == 0x30 && global.zone_act.apparent == 0x0001 && OPG_AIZ2_BG_Pal) // Override base game AIZ2 bomber sky palette
         return
     base.copyPaletteDataFromTable(index, ramAddress)
 }
 
 function u32 System.loadExternalRawData(string key, u32 targetAddress)
 {
-    if (kosinski.waiting_modules && global.zone_act.apparent == 0x0001 && OPG_AIZ2_BG_Pal) // Override mods that have a custom AIZ2 bomber sky palette to load (DA Garden as an example)
+    if ((camera.update_routine == 0x08 || camera.update_routine == 0x18) && kosinski.waiting_modules && global.zone_act.apparent == 0x0001 && OPG_AIZ2_BG_Pal) // Override mods that have a custom AIZ2 bomber sky palette to load (DA Garden as an example)
         return false
     return base.System.loadExternalRawData(key, targetAddress)
 }
