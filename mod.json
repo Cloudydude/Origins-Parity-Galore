@@ -4,7 +4,7 @@
 		"Name": "Origins Parity Galore",
 		"Author": "iCloudius",
 		"Description": "Adds a bunch of features from Origins to Sonic 3air",
-		"ModVersion": "1.60"
+		"ModVersion": "1.61"
 	},
 	"Settings":
 	{
@@ -131,5 +131,32 @@
 				}
 			}
 		]
+	},
+	"OtherMods":
+	{
+		"extra-character-slots-unlimited":
+		{
+			"DisplayName": "Extra Slots Unlimited",
+			"IsRequired": "1",
+			"Priority": "Higher"
+		},
+		"mrgrassman14-misc-fixes-and-tweaks-compatibility":
+		{
+			"DisplayName": "MF&T Compatibility Add-on",
+			"IsRequired": "0",
+			"Priority": "Higher"
+		},
+		"mrgrassman14-misc-fixes-and-tweaks":
+		{
+			"DisplayName": "Misc. Fixes and Tweaks",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		},
+		"wonder-power-blue-glasses-eggman":
+		{
+			"DisplayName": "Blue Glasses Eggman",
+			"IsRequired": "0",
+			"Priority": "Lower"
+		}
 	}
 }
