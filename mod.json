@@ -137,7 +137,7 @@
 		"extra-character-slots-unlimited":
 		{
 			"DisplayName": "Extra Slots Unlimited",
-			"IsRequired": "1",
+			"IsRequired": "0",
 			"Priority": "Higher"
 		},
 		"mrgrassman14-misc-fixes-and-tweaks-compatibility":
