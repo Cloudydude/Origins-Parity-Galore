@@ -123,8 +123,6 @@ function bool Character.CheckStartJump()
     return result
 }
 
-// Thank you feelinfungal
-
 global bool OPG_KnucklesBSPose
 // Change Knuckles to always use victory sprite instead of punching the air in the Blue Spheres Congratulations! screen
 //# address-hook(0x04e000) end(0x04e00c)
