@@ -106,8 +106,6 @@ function void fn0866cc()
         objA0.base_state = 0x12
 }
 
-// Thank you feelinfungal
-
 // Unlock speed when going up the tree in AIZ act 1
 //# address-hook(0x01f8b4)
 function void fn01f8b4()
